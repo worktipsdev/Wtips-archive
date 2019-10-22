@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 //
 // All rights reserved.
 //
@@ -33,8 +34,8 @@
 
 #include "bootstrap_file.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "bcutil"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "bcutil"
 
 namespace po = boost::program_options;
 
@@ -44,7 +45,7 @@ using namespace epee;
 namespace
 {
   // This number was picked by taking the leading 4 bytes from this output:
-  // echo Loki bootstrap file | sha1sum
+  // echo Worktips bootstrap file | sha1sum
   const uint32_t blockchain_raw_magic = 0x28721586;
   const uint32_t header_size = 1024;
 

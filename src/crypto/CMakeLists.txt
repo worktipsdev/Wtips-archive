@@ -1,4 +1,4 @@
-# Copyright (c) 2018, The Loki Project
+# Copyright (c) 2018, The Worktips Project
 # Copyright (c) 2014-2019, The Monero Project
 #
 # All rights reserved.
@@ -78,9 +78,9 @@ set(crypto_private_headers
   skein_port.h
   cn_heavy_hash.hpp)
 
-loki_private_headers(cncrypto
+worktips_private_headers(cncrypto
   ${crypto_private_headers})
-loki_add_library(cncrypto
+worktips_add_library(cncrypto
   ${crypto_sources}
   ${crypto_headers}
   ${crypto_private_headers})

@@ -594,7 +594,7 @@ namespace cryptonote
      * v8, and per byte from v8.
      *
      * The per-output fee is a fixed amount per output created in the
-     * transaction beginning in Loki hard fork 13 and will be 0 before v13.
+     * transaction beginning in Worktips hard fork 13 and will be 0 before v13.
      *
      * @param block_reward the current block reward
      * @param median_block_weight the median block weight in the past window
@@ -622,7 +622,7 @@ namespace cryptonote
      * This function validates the fee is enough for the transaction.
      * This is based on the weight of the transaction, and, after a
      * height threshold, on the average weight of transaction in a past window.
-     * From Loki v13 the amount must also include a per-output-created fee.
+     * From Worktips v13 the amount must also include a per-output-created fee.
      *
      * @param tx_weight the transaction weight
      * @param tx_outs the number of outputs created in the transaction

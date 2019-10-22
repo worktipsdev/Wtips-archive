@@ -1,7 +1,7 @@
 #include "service_node_swarm.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "service_nodes"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "service_nodes"
 
 #ifdef UNIT_TEST
   #define prod_static

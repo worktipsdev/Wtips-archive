@@ -29,7 +29,7 @@
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
 #include "chaingen.h"
-#include "loki_tests.h"
+#include "worktips_tests.h"
 #include "integer_overflow.h"
 
 using namespace epee;
@@ -99,8 +99,8 @@ bool gen_uint_overflow_base::mark_last_valid_block(cryptonote::core& c, size_t e
 
 bool gen_uint_overflow_1::generate(std::vector<test_event_entry>& events) const
 {
-  std::vector<std::pair<uint8_t, uint64_t>> hard_forks = loki_generate_sequential_hard_fork_table();
-  loki_chain_generator gen(events, hard_forks);
+  std::vector<std::pair<uint8_t, uint64_t>> hard_forks = worktips_generate_sequential_hard_fork_table();
+  worktips_chain_generator gen(events, hard_forks);
 
   gen.add_blocks_until_version(hard_forks.back().first);
   gen.add_n_blocks(40);
@@ -111,7 +111,7 @@ bool gen_uint_overflow_1::generate(std::vector<test_event_entry>& events) const
 
   // Problem 1. Miner tx outputs overflow
   {
-    loki_blockchain_entry entry       = gen.create_next_block();
+    worktips_blockchain_entry entry       = gen.create_next_block();
     cryptonote::transaction &miner_tx = entry.block.miner_tx;
     split_miner_tx_outs(miner_tx, MONEY_SUPPLY);
     gen.add_block(entry, false /*can_be_added_to_blockchain*/, "We purposely overflow miner tx by MONEY_SUPPLY in the miner tx");
@@ -124,7 +124,7 @@ bool gen_uint_overflow_1::generate(std::vector<test_event_entry>& events) const
       std::vector<cryptonote::transaction> txs;
       txs.push_back(gen.create_and_add_tx(gen.first_miner_, alice, MK_COINS(1), MK_COINS(100) /*fee*/, false /*kept_by_block*/));
 
-      loki_blockchain_entry entry       = gen.create_next_block(txs);
+      worktips_blockchain_entry entry       = gen.create_next_block(txs);
       cryptonote::transaction &miner_tx = entry.block.miner_tx;
       miner_tx.vout[0].amount           = 0; // Take partial block reward, fee > block_reward so ordinarly it would overflow. This should be disallowed
       gen.add_block(entry, false /*can_be_added_to_blockchain*/, "We should not be able to add TX because the fee is greater than the base miner reward");
@@ -135,7 +135,7 @@ bool gen_uint_overflow_1::generate(std::vector<test_event_entry>& events) const
       std::vector<cryptonote::transaction> txs;
       txs.push_back(gen.create_and_add_tx(gen.first_miner_, alice, MK_COINS(1), MK_COINS(100) /*fee*/, true /*kept_by_block*/));
 
-      loki_blockchain_entry entry       = gen.create_next_block(txs);
+      worktips_blockchain_entry entry       = gen.create_next_block(txs);
       cryptonote::transaction &miner_tx = entry.block.miner_tx;
       miner_tx.vout[0].amount           = 0; // Take partial block reward, fee > block_reward so ordinarly it would overflow. This should be disallowed
       gen.add_block(entry, false /*can_be_added_to_blockchain*/, "We should not be able to add TX because the fee is greater than the base miner reward even if kept_by_block is true");

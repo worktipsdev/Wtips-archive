@@ -87,7 +87,7 @@ public:
   bool prune_blockchain(uint32_t pruning_seed = 0) { return true; }
   void stop() {}
 
-  // TODO(loki): Write tests
+  // TODO(worktips): Write tests
   bool add_service_node_vote(const service_nodes::quorum_vote_t& vote, cryptonote::vote_verification_context &vvc) { return false; }
 };
 

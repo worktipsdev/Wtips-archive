@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 // 
 // All rights reserved.
 // 
@@ -33,10 +34,10 @@
 #include "string_tools.h"
 #include "daemon/command_server.h"
 
-#include "common/loki_integration_test_hooks.h"
+#include "common/worktips_integration_test_hooks.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "daemon"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "daemon"
 
 namespace daemonize {
 
@@ -311,7 +312,7 @@ t_command_server::t_command_server(
     , "bc_dyn_stats <last_block_count>"
     , "Print the information about current blockchain dynamic state."
     );
-    // TODO(loki): Implement
+    // TODO(worktips): Implement
 #if 0
     m_command_lookup.set_handler(
       "update"
@@ -364,7 +365,7 @@ t_command_server::t_command_server(
     , "print_sn_state_changes <start_height> [end height]"
     , "Query the state changes between the range, omit the last argument to scan until the current block"
     );
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
     m_command_lookup.set_handler(
       "relay_votes_and_uptime", std::bind([rpc_server](std::vector<std::string> const &args) {
         rpc_server->on_relay_uptime_and_votes();
@@ -381,19 +382,19 @@ t_command_server::t_command_server(
           valid_cmd = true;
           if (args[0] == "toggle_checkpoint_quorum")
           {
-            loki::integration_test.disable_checkpoint_quorum = !loki::integration_test.disable_checkpoint_quorum;
+            worktips::integration_test.disable_checkpoint_quorum = !worktips::integration_test.disable_checkpoint_quorum;
           }
           else if (args[0] == "toggle_obligation_quorum")
           {
-            loki::integration_test.disable_obligation_quorum = !loki::integration_test.disable_obligation_quorum;
+            worktips::integration_test.disable_obligation_quorum = !worktips::integration_test.disable_obligation_quorum;
           }
           else if (args[0] == "toggle_obligation_uptime_proof")
           {
-            loki::integration_test.disable_obligation_uptime_proof = !loki::integration_test.disable_obligation_uptime_proof;
+            worktips::integration_test.disable_obligation_uptime_proof = !worktips::integration_test.disable_obligation_uptime_proof;
           }
           else if (args[0] == "toggle_obligation_checkpointing")
           {
-            loki::integration_test.disable_obligation_checkpointing = !loki::integration_test.disable_obligation_checkpointing;
+            worktips::integration_test.disable_obligation_checkpointing = !worktips::integration_test.disable_obligation_checkpointing;
           }
           else
           {
@@ -415,7 +416,7 @@ t_command_server::t_command_server(
         if (!valid_cmd)
           std::cout << "integration_test invalid command";
 
-        loki::write_redirected_stdout_to_shared_mem();
+        worktips::write_redirected_stdout_to_shared_mem();
         return true;
       }, p::_1)
     , ""
@@ -438,7 +439,7 @@ bool t_command_server::process_command_vec(const std::vector<std::string>& cmd)
   return result;
 }
 
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
 #include <thread>
 #endif
 
@@ -446,32 +447,32 @@ bool t_command_server::start_handling(std::function<void(void)> exit_handler)
 {
   if (m_is_rpc) return false;
 
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
   auto handle_shared_mem_ins_and_outs = [&]()
   {
     // TODO(doyle): Hack, don't hook into input until the daemon has completely initialised, i.e. you can print the status
-    while(!loki::integration_test.core_is_idle) {}
+    while(!worktips::integration_test.core_is_idle) {}
     mlog_set_categories(""); // TODO(doyle): We shouldn't have to do this.
 
     for (;;)
     {
-      loki::fixed_buffer const input = loki::read_from_stdin_shared_mem();
-      std::vector<std::string> args  = loki::separate_stdin_to_space_delim_args(&input);
+      worktips::fixed_buffer const input = worktips::read_from_stdin_shared_mem();
+      std::vector<std::string> args  = worktips::separate_stdin_to_space_delim_args(&input);
       {
-        boost::unique_lock<boost::mutex> scoped_lock(loki::integration_test_mutex);
-        loki::use_standard_cout();
+        boost::unique_lock<boost::mutex> scoped_lock(worktips::integration_test_mutex);
+        worktips::use_standard_cout();
         std::cout << input.data << std::endl;
-        loki::use_redirected_cout();
+        worktips::use_redirected_cout();
       }
 
       process_command_vec(args);
       if (args.size() == 1 && args[0] == "exit")
       {
-        loki::deinit_integration_test_context();
+        worktips::deinit_integration_test_context();
         break;
       }
 
-      loki::write_redirected_stdout_to_shared_mem();
+      worktips::write_redirected_stdout_to_shared_mem();
     }
   };
   static std::thread handle_remote_stdin_out_thread(handle_shared_mem_ins_and_outs);
@@ -504,7 +505,7 @@ bool t_command_server::help(const std::vector<std::string>& args)
 std::string t_command_server::get_commands_str()
 {
   std::stringstream ss;
-  ss << "Loki '" << LOKI_RELEASE_NAME << "' (v" << LOKI_VERSION_FULL << ")" << std::endl;
+  ss << "Worktips '" << WORKTIPS_RELEASE_NAME << "' (v" << WORKTIPS_VERSION_FULL << ")" << std::endl;
   ss << "Commands: " << std::endl;
   std::string usage = m_command_lookup.get_usage();
   boost::replace_all(usage, "\n", "\n  ");

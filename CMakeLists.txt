@@ -1,4 +1,4 @@
-# Copyright (c) 2018, The Loki Project
+# Copyright (c) 2018, The Worktips Project
 # Copyright (c) 2014-2019, The Monero Project
 #
 # All rights reserved.
@@ -43,7 +43,7 @@ endif()
 cmake_minimum_required(VERSION 2.8.7)
 message(STATUS "CMake version ${CMAKE_VERSION}")
 
-project(loki)
+project(worktips)
 
 function (die msg)
   if (NOT WIN32)
@@ -963,7 +963,7 @@ if (HIDAPI_FOUND OR LibUSB_COMPILE_TEST_PASSED)
 endif()
 
 if (BUILD_INTEGRATION)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D LOKI_ENABLE_INTEGRATION_TEST_HOOKS")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS")
 else()
   option(USE_READLINE "Build with GNU readline support." ON)
   if(USE_READLINE)

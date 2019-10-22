@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 // 
 // All rights reserved.
 // 
@@ -66,10 +67,10 @@
 #include "message_store.h"
 #include "wallet_light_rpc.h"
 
-#include "common/loki_integration_test_hooks.h"
+#include "common/worktips_integration_test_hooks.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "wallet.wallet2"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "wallet.wallet2"
 
 #define SUBADDRESS_LOOKAHEAD_MAJOR 50
 #define SUBADDRESS_LOOKAHEAD_MINOR 200
@@ -226,7 +227,7 @@ private:
 
   enum class stake_check_result { allowed, not_allowed, try_later };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   struct transfer_destination
   {
     std::string address; // Destination public address.
@@ -238,7 +239,7 @@ private:
     END_KV_SERIALIZE_MAP()
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   struct transfer_view
   {
     std::string txid;                                          // Transaction ID for this transfer.
@@ -275,7 +276,7 @@ private:
       KV_SERIALIZE(note);
       KV_SERIALIZE(destinations);
 
-      // TODO(loki): This discrepancy between having to use pay_type if type is
+      // TODO(worktips): This discrepancy between having to use pay_type if type is
       // empty and type if pay type is neither is super unintuitive.
       if (this_ref.type.empty())
       {
@@ -495,7 +496,7 @@ private:
       std::vector<cryptonote::tx_destination_entry> m_dests;
       crypto::hash m_payment_id;
       uint64_t m_timestamp;
-      uint64_t m_unlock_time; // NOTE(loki): Not used after TX v2.
+      uint64_t m_unlock_time; // NOTE(worktips): Not used after TX v2.
       std::vector<uint64_t> m_unlock_times;
       uint32_t m_subaddr_account;   // subaddress account of your wallet to be used in this transfer
       std::set<uint32_t> m_subaddr_indices;  // set of address indices used as inputs in this transfer
@@ -993,7 +994,7 @@ private:
     void get_unconfirmed_payments_out(std::list<std::pair<crypto::hash,wallet2::unconfirmed_transfer_details>>& unconfirmed_payments, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
     void get_unconfirmed_payments(std::list<std::pair<crypto::hash,wallet2::pool_payment_details>>& unconfirmed_payments, const boost::optional<uint32_t>& subaddr_account = boost::none, const std::set<uint32_t>& subaddr_indices = {}) const;
 
-    // NOTE(loki): get_all_service_node caches the result, get_service_nodes doesn't
+    // NOTE(worktips): get_all_service_node caches the result, get_service_nodes doesn't
     std::vector<cryptonote::COMMAND_RPC_GET_SERVICE_NODES::response::entry> get_all_service_nodes(boost::optional<std::string> &failed)                                          const { return m_node_rpc_proxy.get_all_service_nodes(failed); }
     std::vector<cryptonote::COMMAND_RPC_GET_SERVICE_NODES::response::entry> get_service_nodes    (std::vector<std::string> const &pubkeys, boost::optional<std::string> &failed) const { return m_node_rpc_proxy.get_service_nodes(pubkeys, failed); }
     std::vector<cryptonote::COMMAND_RPC_GET_SERVICE_NODE_BLACKLISTED_KEY_IMAGES::entry> get_service_node_blacklisted_key_images(boost::optional<std::string> &failed)            const { return m_node_rpc_proxy.get_service_node_blacklisted_key_images(failed); }
@@ -1756,13 +1757,13 @@ private:
     std::unique_ptr<wallet_device_callback> m_device_callback;
   };
 
-  // TODO(loki): Hmm. We need this here because we make register_service_node do
+  // TODO(worktips): Hmm. We need this here because we make register_service_node do
   // parsing on the wallet2 side instead of simplewallet. This is so that
   // register_service_node RPC command doesn't make it the wallet_rpc's
   // responsibility to parse out the string returned from the daemon. We're
   // purposely abstracting that complexity out to just wallet2's responsibility.
 
-  // TODO(loki): The better question is if anyone is ever going to try use
+  // TODO(worktips): The better question is if anyone is ever going to try use
   // register service node funded by multiple subaddresses. This is unlikely.
   extern const std::array<const char* const, 5> allowed_priority_strings;
   bool parse_subaddress_indices(const std::string& arg, std::set<uint32_t>& subaddr_indices, std::string *err_msg = nullptr);

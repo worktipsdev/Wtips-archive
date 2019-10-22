@@ -1,5 +1,6 @@
 // Copyright (c) 2016-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 //
 // All rights reserved.
 //
@@ -47,14 +48,14 @@
 #include "common/stack_trace.h"
 #include "misc_log_ex.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "stacktrace"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "stacktrace"
 
 #define ST_LOG(x) \
   do { \
     auto elpp = ELPP; \
     if (elpp) { \
-      CINFO(el::base::Writer,el::base::DispatchAction::FileOnlyLog,LOKI_DEFAULT_LOG_CATEGORY) << x; \
+      CINFO(el::base::Writer,el::base::DispatchAction::FileOnlyLog,WORKTIPS_DEFAULT_LOG_CATEGORY) << x; \
     } \
     else { \
       std::cout << x << std::endl; \

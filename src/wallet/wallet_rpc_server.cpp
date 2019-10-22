@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 // 
 // All rights reserved.
 // 
@@ -55,8 +56,8 @@ using namespace epee;
 #include "rpc/core_rpc_server_commands_defs.h"
 #include "daemonizer/daemonizer.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "wallet.rpc"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "wallet.rpc"
 
 #define DEFAULT_AUTO_REFRESH_PERIOD 20 // seconds
 
@@ -68,7 +69,7 @@ namespace
   const command_line::arg_descriptor<std::string> arg_wallet_dir = {"wallet-dir", "Directory for newly created wallets"};
   const command_line::arg_descriptor<bool> arg_prompt_for_password = {"prompt-for-password", "Prompts for password when not provided", false};
 
-  constexpr const char default_rpc_username[] = "loki";
+  constexpr const char default_rpc_username[] = "worktips";
 
   boost::optional<tools::password_container> password_prompter(const char *prompt, bool verify)
   {
@@ -199,7 +200,7 @@ namespace tools
           string_encoding::base64_encode(rand_128bit.data(), rand_128bit.size())
         );
 
-        std::string temp = "loki-wallet-rpc." + bind_port + ".login";
+        std::string temp = "worktips-wallet-rpc." + bind_port + ".login";
         rpc_login_file = tools::private_file::create(temp);
         if (!rpc_login_file.handle())
         {
@@ -248,7 +249,7 @@ namespace tools
     tools::wallet2::BackgroundMiningSetupType setup = m_wallet->setup_background_mining();
     if (setup == tools::wallet2::BackgroundMiningNo)
     {
-      MLOG_RED(el::Level::Warning, "Background mining not enabled. Run \"set setup-background-mining 1\" in loki-wallet-cli to change.");
+      MLOG_RED(el::Level::Warning, "Background mining not enabled. Run \"set setup-background-mining 1\" in worktips-wallet-cli to change.");
       return;
     }
 
@@ -273,8 +274,8 @@ namespace tools
     {
       MINFO("The daemon is not set up to background mine.");
       MINFO("With background mining enabled, the daemon will mine when idle and not on batttery.");
-      MINFO("Enabling this supports the network you are using, and makes you eligible for receiving new Loki");
-      MINFO("Set setup-background-mining to 1 in loki-wallet-cli to change.");
+      MINFO("Enabling this supports the network you are using, and makes you eligible for receiving new Worktips");
+      MINFO("Set setup-background-mining to 1 in worktips-wallet-cli to change.");
       return;
     }
 
@@ -626,7 +627,7 @@ namespace tools
           }
           if (addresses.empty())
           {
-            er.message = std::string("No Loki address found at ") + url;
+            er.message = std::string("No Worktips address found at ") + url;
             return {};
           }
           return addresses[0];
@@ -1851,7 +1852,7 @@ namespace tools
         }
         if (addresses.empty())
         {
-          er.message = std::string("No Loki address found at ") + url;
+          er.message = std::string("No Worktips address found at ") + url;
           return {};
         }
         return addresses[0];
@@ -2283,7 +2284,7 @@ namespace tools
 
     for (tools::transfer_view const &entry : transfers)
     {
-      // TODO(loki): This discrepancy between having to use pay_type if type is
+      // TODO(worktips): This discrepancy between having to use pay_type if type is
       // empty and type if pay type is neither is super unintuitive.
       if (entry.pay_type == tools::pay_type::in ||
           entry.pay_type == tools::pay_type::miner ||
@@ -2643,7 +2644,7 @@ namespace tools
         }
         if (addresses.empty())
         {
-          er.message = std::string("No Loki address found at ") + url;
+          er.message = std::string("No Worktips address found at ") + url;
           return {};
         }
         return addresses[0];
@@ -3950,7 +3951,7 @@ namespace tools
             }
             if (addresses.empty())
             {
-              er.message = std::string("No Loki address found at ") + url;
+              er.message = std::string("No Worktips address found at ") + url;
               return {};
             }
             address = addresses[0];
@@ -4075,7 +4076,7 @@ namespace tools
   //------------------------------------------------------------------------------------------------------------------------------
 
   //
-  // Loki
+  // Worktips
   //
   bool wallet_rpc_server::on_stake(const wallet_rpc::COMMAND_RPC_STAKE::request& req, wallet_rpc::COMMAND_RPC_STAKE::response& res, epee::json_rpc::error& er, const connection_context *ctx)
   {
@@ -4103,7 +4104,7 @@ namespace tools
       return false;
     }
 
-    // NOTE(loki): Pre-emptively set subaddr_account to 0. We don't support onwards from Infinite Staking which is when this call was implemented.
+    // NOTE(worktips): Pre-emptively set subaddr_account to 0. We don't support onwards from Infinite Staking which is when this call was implemented.
     tools::wallet2::stake_result stake_result = m_wallet->create_stake_tx(snode_key, addr_info, req.amount, 0 /*amount_fraction*/, req.priority, 0 /*subaddr_account*/, req.subaddr_indices);
     if (stake_result.status != tools::wallet2::stake_result_status::success)
     {
@@ -4136,7 +4137,7 @@ namespace tools
         args.erase(args.begin());
     }
 
-    // NOTE(loki): Pre-emptively set subaddr_account to 0. We don't support onwards from Infinite Staking which is when this call was implemented.
+    // NOTE(worktips): Pre-emptively set subaddr_account to 0. We don't support onwards from Infinite Staking which is when this call was implemented.
     tools::wallet2::register_service_node_result register_result = m_wallet->create_register_service_node_tx(args, 0 /*subaddr_account*/);
     if (register_result.status != tools::wallet2::register_service_node_result_status::success)
     {
@@ -4174,7 +4175,7 @@ namespace tools
     return true;
   }
 
-  // TODO(loki): Deprecate this and make it return the TX as hex? Then just transfer it as normal? But these have no fees and or amount .. so maybe not?
+  // TODO(worktips): Deprecate this and make it return the TX as hex? Then just transfer it as normal? But these have no fees and or amount .. so maybe not?
   bool wallet_rpc_server::on_request_stake_unlock(const wallet_rpc::COMMAND_RPC_REQUEST_STAKE_UNLOCK::request& req, wallet_rpc::COMMAND_RPC_REQUEST_STAKE_UNLOCK::response& res, epee::json_rpc::error& er, const connection_context *ctx)
   {
     if (!m_wallet) return not_open(er);
@@ -4410,12 +4411,12 @@ int main(int argc, char** argv) {
   bool should_terminate = false;
   std::tie(vm, should_terminate) = wallet_args::main(
     argc, argv,
-    "loki-wallet-rpc [--wallet-file=<file>|--generate-from-json=<file>|--wallet-dir=<directory>] [--rpc-bind-port=<port>]",
-    tools::wallet_rpc_server::tr("This is the RPC loki wallet. It needs to connect to a loki\ndaemon to work correctly."),
+    "worktips-wallet-rpc [--wallet-file=<file>|--generate-from-json=<file>|--wallet-dir=<directory>] [--rpc-bind-port=<port>]",
+    tools::wallet_rpc_server::tr("This is the RPC worktips wallet. It needs to connect to a worktips\ndaemon to work correctly."),
     desc_params,
     po::positional_options_description(),
     [](const std::string &s, bool emphasis){ epee::set_console_color(emphasis ? epee::console_color_white : epee::console_color_default, true); std::cout << s << std::endl; if (emphasis) epee::reset_console_color(); },
-    "loki-wallet-rpc.log",
+    "worktips-wallet-rpc.log",
     true
   );
   if (!vm)

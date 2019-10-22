@@ -106,25 +106,25 @@ int main(int argc, char* argv[])
   {
     list_tests = command_line::get_arg(vm, arg_list_tests);
 
-    // NOTE: Loki Tests
-    GENERATE_AND_PLAY(loki_checkpointing_alt_chain_more_service_node_checkpoints_less_pow_overtakes);
-    GENERATE_AND_PLAY(loki_checkpointing_alt_chain_receive_checkpoint_votes_should_reorg_back);
-    GENERATE_AND_PLAY(loki_checkpointing_alt_chain_with_increasing_service_node_checkpoints);
-    GENERATE_AND_PLAY(loki_checkpointing_service_node_checkpoint_from_votes);
-    GENERATE_AND_PLAY(loki_checkpointing_service_node_checkpoints_check_reorg_windows);
-    GENERATE_AND_PLAY(loki_core_block_reward_unpenalized);
-    GENERATE_AND_PLAY(loki_core_governance_batched_reward);
-    GENERATE_AND_PLAY(loki_core_test_deregister_preferred);
-    GENERATE_AND_PLAY(loki_core_test_deregister_safety_buffer);
-    GENERATE_AND_PLAY(loki_core_test_deregister_too_old);
-    GENERATE_AND_PLAY(loki_core_test_deregister_zero_fee);
-    GENERATE_AND_PLAY(loki_core_test_deregister_on_split);
-    GENERATE_AND_PLAY(loki_core_test_state_change_ip_penalty_disallow_dupes);
-    GENERATE_AND_PLAY(loki_service_nodes_alt_quorums);
-    GENERATE_AND_PLAY(loki_service_nodes_checkpoint_quorum_size);
-    GENERATE_AND_PLAY(loki_service_nodes_gen_nodes);
-    GENERATE_AND_PLAY(loki_service_nodes_test_rollback);
-    GENERATE_AND_PLAY(loki_service_nodes_test_swarms_basic);
+    // NOTE: Worktips Tests
+    GENERATE_AND_PLAY(worktips_checkpointing_alt_chain_more_service_node_checkpoints_less_pow_overtakes);
+    GENERATE_AND_PLAY(worktips_checkpointing_alt_chain_receive_checkpoint_votes_should_reorg_back);
+    GENERATE_AND_PLAY(worktips_checkpointing_alt_chain_with_increasing_service_node_checkpoints);
+    GENERATE_AND_PLAY(worktips_checkpointing_service_node_checkpoint_from_votes);
+    GENERATE_AND_PLAY(worktips_checkpointing_service_node_checkpoints_check_reorg_windows);
+    GENERATE_AND_PLAY(worktips_core_block_reward_unpenalized);
+    GENERATE_AND_PLAY(worktips_core_governance_batched_reward);
+    GENERATE_AND_PLAY(worktips_core_test_deregister_preferred);
+    GENERATE_AND_PLAY(worktips_core_test_deregister_safety_buffer);
+    GENERATE_AND_PLAY(worktips_core_test_deregister_too_old);
+    GENERATE_AND_PLAY(worktips_core_test_deregister_zero_fee);
+    GENERATE_AND_PLAY(worktips_core_test_deregister_on_split);
+    GENERATE_AND_PLAY(worktips_core_test_state_change_ip_penalty_disallow_dupes);
+    GENERATE_AND_PLAY(worktips_service_nodes_alt_quorums);
+    GENERATE_AND_PLAY(worktips_service_nodes_checkpoint_quorum_size);
+    GENERATE_AND_PLAY(worktips_service_nodes_gen_nodes);
+    GENERATE_AND_PLAY(worktips_service_nodes_test_rollback);
+    GENERATE_AND_PLAY(worktips_service_nodes_test_swarms_basic);
 
     // NOTE: Monero Tests
     GENERATE_AND_PLAY(gen_simple_chain_001);
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 
     GENERATE_AND_PLAY(gen_uint_overflow_1);
 
-    // TODO(loki): We also want to run these tx tests on deregistration tx's
+    // TODO(worktips): We also want to run these tx tests on deregistration tx's
     // as well because they special case and run under very different code
     // paths from the regular tx path
     // Transaction verification tests
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
     GENERATE_AND_PLAY(gen_tx_invalid_input_amount);
     GENERATE_AND_PLAY(gen_tx_input_wo_key_offsets);
     GENERATE_AND_PLAY(gen_tx_key_offset_points_to_foreign_key);
-    GENERATE_AND_PLAY(gen_tx_sender_key_offset_not_exist); // TODO(loki): Revisit this test
+    GENERATE_AND_PLAY(gen_tx_sender_key_offset_not_exist); // TODO(worktips): Revisit this test
     GENERATE_AND_PLAY(gen_tx_key_image_not_derive_from_tx_key);
     GENERATE_AND_PLAY(gen_tx_key_image_is_invalid);
     GENERATE_AND_PLAY(gen_tx_txout_to_key_has_invalid_key);
@@ -208,14 +208,14 @@ int main(int argc, char* argv[])
     GENERATE_AND_PLAY(gen_bp_tx_invalid_wrong_amount);
     GENERATE_AND_PLAY(gen_bp_tx_invalid_borromean_type);
 
-    // TODO(loki): Tests we need to fix
+    // TODO(worktips): Tests we need to fix
 #if 0
       //GENERATE_AND_PLAY(gen_ring_signature_big); // Takes up to XXX hours (if CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW == 10)
       //GENERATE_AND_PLAY(gen_block_invalid_binary_format); // Takes up to 3 hours, if CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW == 500, up to 30 minutes, if CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW == 10
 
       // Transaction verification tests
-      GENERATE_AND_PLAY(gen_tx_mixed_key_offset_not_exist); // TODO(loki): See comment in the function
-      GENERATE_AND_PLAY(gen_tx_output_with_zero_amount); // TODO(loki): See comment in the function
+      GENERATE_AND_PLAY(gen_tx_mixed_key_offset_not_exist); // TODO(worktips): See comment in the function
+      GENERATE_AND_PLAY(gen_tx_output_with_zero_amount); // TODO(worktips): See comment in the function
 
       // Double spend
       GENERATE_AND_PLAY(gen_double_spend_in_tx<false>);

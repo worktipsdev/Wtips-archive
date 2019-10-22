@@ -1,9 +1,9 @@
-Loki daemon internationalization
+Worktips daemon internationalization
 ==================================
 
-The Loki command line tools can be translated in various languages. If you wish to contribute and need help/support, contact the [Loki Localization Workgroup on Taiga](https://taiga.getloki.org/project/erciccione-loki-localization/) or come chat on `#loki-translations` (Freenode/IRC, riot/matrix, MatterMost)
+The Worktips command line tools can be translated in various languages. If you wish to contribute and need help/support, contact the [Worktips Localization Workgroup on Taiga](https://taiga.getworktips.org/project/erciccione-worktips-localization/) or come chat on `#worktips-translations` (Freenode/IRC, riot/matrix, MatterMost)
 
-In order to use the same translation workflow as the [Loki GUI](https://github.com/loki-project/loki-gui), they use Qt Linguist translation files.  However, to avoid the dependencies on Qt this normally implies, they use a custom loader to read those files at runtime.
+In order to use the same translation workflow as the [Worktips GUI](https://github.com/worktips-project/worktips-gui), they use Qt Linguist translation files.  However, to avoid the dependencies on Qt this normally implies, they use a custom loader to read those files at runtime.
 
 ### Tools for translators
 
@@ -22,13 +22,13 @@ To update ts files after changing source code:
 To add a new language, eg Spanish (ISO code es):
 
 ```bash
-cp translations/loki.ts translations/loki_es.ts
+cp translations/worktips.ts translations/worktips_es.ts
 ```
 
 To edit translations for Spanish:
 
 ```bash
-linguist translations/loki_es.ts
+linguist translations/worktips_es.ts
 ```
 
 To build translations after modifying them:
@@ -40,7 +40,7 @@ To build translations after modifying them:
 To test a translation:
 
 ```bash
-LANG=es ./build/release/bin/loki-wallet-cli
+LANG=es ./build/release/bin/worktips-wallet-cli
 ```
 
 To add new translatable strings in the source code:

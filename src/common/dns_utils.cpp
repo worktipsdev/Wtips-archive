@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 //
 // All rights reserved.
 //
@@ -40,8 +41,8 @@
 #include <boost/optional.hpp>
 using namespace epee;
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "net.dns"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "net.dns"
 
 static const char *DEFAULT_DNS_PUBLIC_ADDR[] =
 {
@@ -282,7 +283,7 @@ DNSResolver::DNSResolver() : m_data(new DNSResolverData())
 
   if (!DNS_PUBLIC)
   {
-    // TODO(loki): Don't probe moneropulse for Loki
+    // TODO(worktips): Don't probe moneropulse for Worktips
 #if 0
     // if no DNS_PUBLIC specified, we try a lookup to what we know
     // should be a valid DNSSEC record, and switch to known good
@@ -437,9 +438,9 @@ std::string address_from_txt_record(const std::string& s)
   return {};
 }
 /**
- * @brief gets a loki address from the TXT record of a DNS entry
+ * @brief gets a worktips address from the TXT record of a DNS entry
  *
- * gets the loki address from the TXT record of the DNS entry associated
+ * gets the worktips address from the TXT record of the DNS entry associated
  * with <url>.  If this lookup fails, or the TXT record does not contain an
  * XMR address in the correct format, returns an empty string.  <dnssec_valid>
  * will be set true or false according to whether or not the DNS query passes
@@ -448,7 +449,7 @@ std::string address_from_txt_record(const std::string& s)
  * @param url the url to look up
  * @param dnssec_valid return-by-reference for DNSSEC status of query
  *
- * @return a loki address (as a string) or an empty string
+ * @return a worktips address (as a string) or an empty string
  */
 std::vector<std::string> addresses_from_url(const std::string& url, bool& dnssec_valid)
 {
@@ -465,7 +466,7 @@ std::vector<std::string> addresses_from_url(const std::string& url, bool& dnssec
   }
   else dnssec_valid = false;
 
-  // for each txt record, try to find a loki address in it.
+  // for each txt record, try to find a worktips address in it.
   for (auto& rec : records)
   {
     std::string addr = address_from_txt_record(rec);

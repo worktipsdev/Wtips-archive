@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 //
 // All rights reserved.
 //
@@ -43,11 +44,11 @@ using namespace epee;
 #include "crypto/hash.h"
 #include "int-util.h"
 #include "common/dns_utils.h"
-#include "common/loki.h"
+#include "common/worktips.h"
 #include <cfenv>
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "cn"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "cn"
 
 namespace cryptonote {
 
@@ -94,24 +95,48 @@ namespace cryptonote {
   uint64_t block_reward_unpenalized_formula_v8(uint64_t height)
   {
     std::fesetround(FE_TONEAREST);
-    uint64_t result = 28000000000.0 + 100000000000.0 / loki::exp2(height / (720.0 * 90.0)); // halve every 90 days.
+    uint64_t result = 28000000000.0 + 100000000000.0 / worktips::exp2(height / (720.0 * 90.0)); // halve every 90 days.
     return result;
   }
+  
+  uint64_t block_reward_unpenalized_formula_v9(uint64_t height)
+  {
+    std::fesetround(FE_TONEAREST);
+    uint64_t result = 28000000000.0 + 200000000000.0 / worktips::exp2(height / (720.0 * 90.0)); // halve every 90 days.
+    return result;
+  }
+
+  uint64_t block_reward_unpenalized_formula_v13(uint64_t height)
+  {
+    std::fesetround(FE_TONEAREST);
+    uint64_t result = 28000000000.0 + 200000000000.0 / worktips::exp2(height / (2880 * 90.0)); // halve every 90 days.
+    return result;
+  }  
 
   bool get_base_block_reward(size_t median_weight, size_t current_block_weight, uint64_t already_generated_coins, uint64_t &reward, uint64_t &reward_unpenalized, uint8_t version, uint64_t height) {
 
     //premine reward
-    if (already_generated_coins == 0)
-    {
-      reward = 22500000000000000;
+    const uint64_t premine = PREMINE;
+    if (median_weight > 0 && already_generated_coins < premine) {
+      reward = premine;
       return true;
     }
 
     static_assert(DIFFICULTY_TARGET_V2%60==0,"difficulty targets must be a multiple of 60");
 
-    uint64_t base_reward = version >= network_version_8
+  if (version == network_version_8)	{
+      uint64_t base_reward = block_reward_unpenalized_formula_v8(height)
+	}
+    if (version >= network_version_9_service_nodes)	{
+      base_reward = block_reward_unpenalized_formula_v9(height)
+	}
+	if (version >= network_version_13_enforce_checkpoints)	{
+      base_reward = block_reward_unpenalized_formula_v13(height)
+	}
+
+/*   uint64_t base_reward = version == network_version_8
                                ? block_reward_unpenalized_formula_v8(height)
-                               : block_reward_unpenalized_formula_v7(already_generated_coins, height);
+                               : block_reward_unpenalized_formula_v7(already_generated_coins, height);*/
     uint64_t full_reward_zone = get_min_block_weight(version);
 
     //make it soft

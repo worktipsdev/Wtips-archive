@@ -1,4 +1,5 @@
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 //
 // All rights reserved.
 //
@@ -45,8 +46,8 @@
 
 #include <boost/endian/conversion.hpp>
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "service_nodes"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "service_nodes"
 
 namespace service_nodes
 {
@@ -270,7 +271,7 @@ namespace service_nodes
           }
         }
 
-        // TODO(loki): Temporary HF13 code, remove when we hit HF13 because we delete all HF12 checkpoints and don't need conditionals for HF12/HF13 checkpointing code
+        // TODO(worktips): Temporary HF13 code, remove when we hit HF13 because we delete all HF12 checkpoints and don't need conditionals for HF12/HF13 checkpointing code
         std::vector<crypto::public_key> const &quorum_keys =
             (hf_version >= cryptonote::network_version_13_enforce_checkpoints) ? quorum.validators : quorum.workers;
         if (hf_version >= cryptonote::network_version_13_enforce_checkpoints)
@@ -327,7 +328,7 @@ namespace service_nodes
     result.type                  = quorum_type::checkpointing;
     result.checkpoint.block_hash = block_hash;
     result.block_height          = block_height;
-    // TODO(loki): Temporary HF13 code, remove when we hit HF13 because we delete all HF12 checkpoints and don't need conditionals for HF12/HF13 checkpointing code
+    // TODO(worktips): Temporary HF13 code, remove when we hit HF13 because we delete all HF12 checkpoints and don't need conditionals for HF12/HF13 checkpointing code
     result.group                 = (hf_version >= cryptonote::network_version_13_enforce_checkpoints) ? quorum_group::validator : quorum_group::worker;
     result.index_in_group        = index_in_quorum;
     result.signature             = make_signature_from_vote(result, keys);
@@ -428,7 +429,7 @@ namespace service_nodes
 
       case quorum_type::checkpointing:
       {
-        // TODO(loki): Temporary HF13 code, remove when we hit HF13 because we delete all HF12 checkpoints and don't need conditionals for HF12/HF13 checkpointing code
+        // TODO(worktips): Temporary HF13 code, remove when we hit HF13 because we delete all HF12 checkpoints and don't need conditionals for HF12/HF13 checkpointing code
         quorum_group expected_group =
             (hf_version >= cryptonote::network_version_13_enforce_checkpoints) ? quorum_group::validator : quorum_group::worker;
         if (vote.group != expected_group)
@@ -521,7 +522,7 @@ namespace service_nodes
     CRITICAL_REGION_LOCAL(m_lock);
 
     // TODO(doyle): Rate-limiting: A better threshold value that follows suite with transaction relay time back-off
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
     constexpr uint64_t TIME_BETWEEN_RELAY = 0;
 #else
     constexpr uint64_t TIME_BETWEEN_RELAY = 60 * 2;

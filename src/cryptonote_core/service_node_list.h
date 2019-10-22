@@ -1,4 +1,5 @@
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 //
 // All rights reserved.
 //
@@ -46,7 +47,7 @@ struct checkpoint_t;
 namespace service_nodes
 {
   constexpr uint64_t INVALID_HEIGHT = static_cast<uint64_t>(-1);
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   struct checkpoint_vote_record
   {
     uint64_t height = INVALID_HEIGHT;
@@ -262,7 +263,7 @@ namespace service_nodes
   };
 
   template<typename RandomIt>
-  void loki_shuffle(RandomIt begin, RandomIt end, uint64_t seed)
+  void worktips_shuffle(RandomIt begin, RandomIt end, uint64_t seed)
   {
     if (end <= begin + 1) return;
     const size_t size = std::distance(begin, end);
@@ -280,7 +281,7 @@ namespace service_nodes
     /// The service node key pair used for registration-related data on the chain; is
     /// curve25519-based but with Monero-specific changes that make it useless for external tools
     /// supporting standard ed25519 or x25519 keys.
-    /// TODO(loki) - eventually drop this key and just do everything with the ed25519 key.
+    /// TODO(worktips) - eventually drop this key and just do everything with the ed25519 key.
     crypto::secret_key key;
     crypto::public_key pub;
 

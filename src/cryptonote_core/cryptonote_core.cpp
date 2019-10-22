@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 //
 // All rights reserved.
 //
@@ -64,10 +65,10 @@ extern "C" {
 #include "common/i18n.h"
 #include "net/local_ip.h"
 
-#include "common/loki_integration_test_hooks.h"
+#include "common/worktips_integration_test_hooks.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "cn"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "cn"
 
 DISABLE_VS_WARNINGS(4355)
 
@@ -164,7 +165,7 @@ namespace cryptonote
   };
   static const command_line::arg_descriptor<std::string> arg_check_updates = {
     "check-updates"
-  , "Check for new versions of loki: [disabled|notify|download|update]"
+  , "Check for new versions of worktips: [disabled|notify|download|update]"
   , "notify"
   };
   static const command_line::arg_descriptor<bool> arg_pad_transactions  = {
@@ -183,7 +184,7 @@ namespace cryptonote
   };
   static const command_line::arg_descriptor<std::string> arg_public_ip = {
     "service-node-public-ip"
-  , "Public IP address on which this service node's services (such as the Loki "
+  , "Public IP address on which this service node's services (such as the Worktips "
     "storage server) are accessible. This IP address will be advertised to the "
     "network via the service node uptime proofs. Required if operating as a "
     "service node."
@@ -192,7 +193,7 @@ namespace cryptonote
     "storage-server-port"
   , "The port on which this service node's storage server is accessible. A listening "
     "storage server is required for service nodes. (This option is specified "
-    "automatically when using Loki Launcher.)"
+    "automatically when using Worktips Launcher.)"
   , 0};
   static const command_line::arg_descriptor<std::string> arg_block_notify = {
     "block-notify"
@@ -340,9 +341,9 @@ namespace cryptonote
 
     command_line::add_arg(desc, arg_recalculate_difficulty);
     command_line::add_arg(desc, arg_store_quorum_history);
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
-    command_line::add_arg(desc, loki::arg_integration_test_hardforks_override);
-    command_line::add_arg(desc, loki::arg_integration_test_shared_mem_name);
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
+    command_line::add_arg(desc, worktips::arg_integration_test_hardforks_override);
+    command_line::add_arg(desc, worktips::arg_integration_test_shared_mem_name);
 #endif
 
     miner::init_options(desc);
@@ -394,7 +395,7 @@ namespace cryptonote
 
         if (!epee::net_utils::is_ip_public(m_sn_public_ip)) {
           if (m_service_node_list.debug_allow_local_ips) {
-            MWARNING("Address given for public-ip is not public; allowing it because dev-allow-local-ips was specified. This service node WILL NOT WORK ON THE PUBLIC LOKI NETWORK!");
+            MWARNING("Address given for public-ip is not public; allowing it because dev-allow-local-ips was specified. This service node WILL NOT WORK ON THE PUBLIC WORKTIPS NETWORK!");
           } else {
             MERROR("Address given for public-ip is not public: " << epee::string_tools::get_ip_string_from_int32(m_sn_public_ip));
             storage_ok = false;
@@ -408,7 +409,7 @@ namespace cryptonote
       }
 
       if (!storage_ok) {
-        MERROR("IMPORTANT: All service node operators are now required to run the loki storage "
+        MERROR("IMPORTANT: All service node operators are now required to run the worktips storage "
                << "server and provide the public ip and port on which it can be accessed on the internet.");
         return false;
       }
@@ -487,8 +488,8 @@ namespace cryptonote
   {
     start_time = std::time(nullptr);
 
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
-    const std::string arg_integration_test_override_hardforks = command_line::get_arg(vm, loki::arg_integration_test_hardforks_override);
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
+    const std::string arg_integration_test_override_hardforks = command_line::get_arg(vm, worktips::arg_integration_test_hardforks_override);
 
     std::vector<std::pair<uint8_t, uint64_t>> integration_test_hardforks;
     if (!arg_integration_test_override_hardforks.empty())
@@ -516,8 +517,8 @@ namespace cryptonote
       test_options = &integration_hardfork_override;
 
     {
-      const std::string arg_shared_mem_name = command_line::get_arg(vm, loki::arg_integration_test_shared_mem_name);
-      loki::init_integration_test_context(arg_shared_mem_name);
+      const std::string arg_shared_mem_name = command_line::get_arg(vm, worktips::arg_integration_test_shared_mem_name);
+      worktips::init_integration_test_context(arg_shared_mem_name);
     }
 #endif
 
@@ -564,8 +565,8 @@ namespace cryptonote
       if (boost::filesystem::exists(old_files / "blockchain.bin"))
       {
         MWARNING("Found old-style blockchain.bin in " << old_files.string());
-        MWARNING("Loki now uses a new format. You can either remove blockchain.bin to start syncing");
-        MWARNING("the blockchain anew, or use loki-blockchain-export and loki-blockchain-import to");
+        MWARNING("Worktips now uses a new format. You can either remove blockchain.bin to start syncing");
+        MWARNING("the blockchain anew, or use worktips-blockchain-export and worktips-blockchain-import to");
         MWARNING("convert your existing blockchain.bin to the new format. See README.md for instructions.");
         return false;
       }
@@ -591,7 +592,7 @@ namespace cryptonote
 
     if (m_nettype == FAKECHAIN)
     {
-#if !defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS) // In integration mode, don't delete the DB. This should be explicitly done in the tests. Otherwise the more likely behaviour is persisting the DB across multiple daemons in the same test.
+#if !defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS) // In integration mode, don't delete the DB. This should be explicitly done in the tests. Otherwise the more likely behaviour is persisting the DB across multiple daemons in the same test.
       // reset the db by removing the database file before opening it
       if (!db->remove_data_file(filename))
       {
@@ -884,7 +885,7 @@ namespace cryptonote
 
     // Secondary standard ed25519 key, usable in tools wanting standard ed25519 keys
     //
-    // TODO(loki) - eventually it would be nice to make this become the only key pair that gets used
+    // TODO(worktips) - eventually it would be nice to make this become the only key pair that gets used
     // for new registrations instead of the above.  We'd still need to keep the above for
     // compatibility with existing stakes registered before the relevant fork height, but we could
     // then avoid needing to include this secondary key in uptime proofs for new SN registrations.
@@ -1591,7 +1592,7 @@ namespace cryptonote
     std::vector<block_complete_entry> blocks;
     m_miner.pause();
     {
-      LOKI_DEFER { m_miner.resume(); };
+      WORKTIPS_DEFER { m_miner.resume(); };
       try
       {
         blocks.push_back(get_block_complete_entry(b, m_mempool));
@@ -1650,7 +1651,7 @@ namespace cryptonote
     bool result = m_blockchain_storage.add_new_block(b, bvc, checkpoint);
     if (result)
     {
-      // TODO(loki): PERF(loki): This causes perf problems in integration mode, so in real-time operation it may not be
+      // TODO(worktips): PERF(worktips): This causes perf problems in integration mode, so in real-time operation it may not be
       // noticeable but could bubble up and cause slowness if the runtime variables align up undesiredly.
       relay_service_node_votes(); // NOTE: nop if synchronising due to not accepting votes whilst syncing
     }
@@ -1710,7 +1711,7 @@ namespace cryptonote
       b = &lb;
     }
 
-    // TODO(loki): Temporary to make hf12 checkpoints play nicely, but, hf12 checkpoints will be deleted on hf13
+    // TODO(worktips): Temporary to make hf12 checkpoints play nicely, but, hf12 checkpoints will be deleted on hf13
     if (checkpoint && b->major_version < network_version_12_checkpointing)
     {
       std::sort(checkpoint->signatures.begin(),
@@ -1865,7 +1866,7 @@ namespace cryptonote
           {
             MGINFO_RED(
                 "Failed to submit uptime proof: have not heard from the storage server recently. Make sure that it "
-                "is running! It is required to run alongside the Loki daemon");
+                "is running! It is required to run alongside the Worktips daemon");
             return true;
           }
 
@@ -1888,7 +1889,7 @@ namespace cryptonote
     {
       std::string main_message;
       if (m_offline)
-        main_message = "The daemon is running offline and will not attempt to sync to the Loki network.";
+        main_message = "The daemon is running offline and will not attempt to sync to the Worktips network.";
       else
         main_message = "The daemon will start synchronizing with the network. This may take a long time to complete.";
       MGINFO_YELLOW(ENDL << "**********************************************************************" << ENDL
@@ -1920,8 +1921,8 @@ namespace cryptonote
     m_miner.on_idle();
     m_mempool.on_idle();
 
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
-    loki::integration_test.core_is_idle = true;
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
+    worktips::integration_test.core_is_idle = true;
 #endif
 
     return true;
@@ -1974,7 +1975,7 @@ namespace cryptonote
   //-----------------------------------------------------------------------------------------------
   bool core::check_updates()
   {
-    static const char software[] = "loki";
+    static const char software[] = "worktips";
 #ifdef BUILD_TAG
     static const char buildtag[] = BOOST_PP_STRINGIZE(BUILD_TAG);
     static const char subdir[] = "cli"; // because it can never be simple
@@ -1994,7 +1995,7 @@ namespace cryptonote
     if (!tools::check_updates(software, buildtag, version, hash))
       return false;
 
-    if (tools::vercmp(version.c_str(), LOKI_VERSION) <= 0)
+    if (tools::vercmp(version.c_str(), WORKTIPS_VERSION) <= 0)
     {
       m_update_available = false;
       return true;
@@ -2153,7 +2154,7 @@ namespace cryptonote
       return true;
     }
 
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
     MDEBUG("Not checking block rate, integration test mode");
     return true;
 #endif
@@ -2173,7 +2174,7 @@ namespace cryptonote
       MDEBUG("blocks in the last " << seconds[n] / 60 << " minutes: " << b << " (probability " << p << ")");
       if (p < threshold)
       {
-        MWARNING("There were " << b << " blocks in the last " << seconds[n] / 60 << " minutes, there might be large hash rate changes, or we might be partitioned, cut off from the Loki network or under attack. Or it could be just sheer bad luck.");
+        MWARNING("There were " << b << " blocks in the last " << seconds[n] / 60 << " minutes, there might be large hash rate changes, or we might be partitioned, cut off from the Worktips network or under attack. Or it could be just sheer bad luck.");
 
         std::shared_ptr<tools::Notify> block_rate_notify = m_block_rate_notify;
         if (block_rate_notify)

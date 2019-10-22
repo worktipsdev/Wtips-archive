@@ -1,4 +1,4 @@
-# Copyright (c) 2018, The Loki Project
+# Copyright (c) 2018, The Worktips Project
 # Copyright (c) 2014-2019, The Monero Project
 #
 # All rights reserved.
@@ -54,9 +54,9 @@ if (BERKELEY_DB)
   )
 endif()
 
-loki_private_headers(blockchain_db
+worktips_private_headers(blockchain_db
   ${crypto_private_headers})
-loki_add_library(blockchain_db
+worktips_add_library(blockchain_db
   ${blockchain_db_sources}
   ${blockchain_db_headers}
   ${blockchain_db_private_headers})

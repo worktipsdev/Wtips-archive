@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 // 
 // All rights reserved.
 // 
@@ -182,7 +183,7 @@ namespace daemonizer
     }
     else // interactive
     {
-      //LOG_PRINT_L0("Loki '" << LOKI_RELEASE_NAME << "' (v" << LOKI_VERSION_FULL);
+      //LOG_PRINT_L0("Worktips '" << WORKTIPS_RELEASE_NAME << "' (v" << WORKTIPS_VERSION_FULL);
       if (command_line::has_arg(vm, arg_non_interactive))
         return executor.run_non_interactive(vm);
       else

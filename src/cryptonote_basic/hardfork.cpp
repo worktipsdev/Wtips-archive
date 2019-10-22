@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 // 
 // All rights reserved.
 // 
@@ -30,13 +31,13 @@
 #include <algorithm>
 #include <cstdio>
 
-#include "common/loki.h"
+#include "common/worktips.h"
 #include "cryptonote_basic/cryptonote_basic.h"
 #include "blockchain_db/blockchain_db.h"
 #include "hardfork.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "hardfork"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "hardfork"
 
 using namespace cryptonote;
 
@@ -56,7 +57,7 @@ static uint8_t get_block_version(const cryptonote::block &b)
   return b.major_version;
 }
 
-// TODO(loki): Re-evaluate Hardfork as a class. Originally designed to
+// TODO(worktips): Re-evaluate Hardfork as a class. Originally designed to
 // handle voting, hardforks are now locked in, maybe we just need helper
 // functions on the hardcoded table instead of hiding everything behind
 // a class.
@@ -64,34 +65,35 @@ static uint8_t get_block_version(const cryptonote::block &b)
 // version 7 from the start of the blockchain, inhereted from Monero mainnet
 static constexpr HardFork::Params mainnet_hard_forks[] =
 {
-  { network_version_7,                      1,      0, 1503046577 },
-  { network_version_8,                      64324,  0, 1533006000 },
-  { network_version_9_service_nodes,        101250, 0, 1537444800 },
-  { network_version_10_bulletproofs,        161849, 0, 1544743800 }, // 2018-12-13 23:30UTC
-  { network_version_11_infinite_staking,    234767, 0, 1554170400 }, // 2019-03-26 13:00AEDT
-  { network_version_12_checkpointing,       321467, 0, 1563940800 }, // 2019-07-24 14:00AEDT
-  { network_version_13_enforce_checkpoints, 385824, 0, 1571850000 }, // 2019-10-23 19:00AEDT
+  { network_version_7,                  	 1, 0, 1554448799 },
+  { network_version_8,                  	10, 0, 1554448860 },
+  { network_version_9_service_nodes,     54689, 0, 1561804620 },
+  { network_version_10_bulletproofs,     54690, 0, 1561804740 },
+  { network_version_11_infinite_staking, 54691, 0, 1561804860 },
+/*  { network_version_12_checkpointing,       , 0,  }, 
+  { network_version_13_enforce_checkpoints, , 0,  }, */
 };
 
 static constexpr HardFork::Params testnet_hard_forks[] =
 {
-  { network_version_7,                      1,      0, 1533631121 },
-  { network_version_8,                      2,      0, 1533631122 },
-  { network_version_9_service_nodes,        3,      0, 1533631123 },
-  { network_version_10_bulletproofs,        4,      0, 1542681077 },
-  { network_version_11_infinite_staking,    5,      0, 1551223964 },
-  { network_version_12_checkpointing,       75471,  0, 1561608000 }, // 2019-06-28 14:00AEDT
-  { network_version_13_enforce_checkpoints, 127028, 0, 1568440800 }, // 2019-09-13 16:00AEDT
+  { network_version_7,                      1, 0, 1533631121 },
+  { network_version_8,                      2, 0, 1533631122 },
+  { network_version_9_service_nodes,        10,0, 1533631123 },
+  { network_version_10_bulletproofs,        11,0, 1542681077 },
+  { network_version_11_infinite_staking,    12,0, 1551223964 },
+  { network_version_12_checkpointing,       30,0, 1561608000 }, 
+  { network_version_13_enforce_checkpoints, 40,0, 1568440800 },
 };
 
 static constexpr HardFork::Params stagenet_hard_forks[] =
 {
-  { network_version_7,                   1,      0, 1341378000 },
-  { network_version_8,                   64324,  0, 1533006000 },
-  { network_version_9_service_nodes,     96210,  0, 1536840000 },
-  { network_version_10_bulletproofs,     96211,  0, 1536840120 },
-  { network_version_11_infinite_staking, 147029, 0, 1551223964 }, // 2019-02-27 12:30 AEDT
-  { network_version_12_checkpointing,    213125, 0, 1561608000 }, // 2019-06-28 14:00 AEDT
+  { network_version_7,                      1, 0, 1533631121 },
+  { network_version_8,                      2, 0, 1533631122 },
+  { network_version_9_service_nodes,        10,0, 1533631123 },
+  { network_version_10_bulletproofs,        11,0, 1542681077 },
+  { network_version_11_infinite_staking,    12,0, 1551223964 },
+  { network_version_12_checkpointing,       30,0, 1561608000 }, 
+  { network_version_13_enforce_checkpoints, 40,0, 1568440800 },
 };
 
 uint64_t HardFork::get_hardcoded_hard_fork_height(network_type nettype, cryptonote::network_version version)

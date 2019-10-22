@@ -1,11 +1,11 @@
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
 
 #if defined _WIN32
 #error "Need to implement semaphores for Windows Layer"
 #endif
 
-#ifndef LOKI_INTEGRATION_TEST_HOOKS_H
-#define LOKI_INTEGRATION_TEST_HOOKS_H
+#ifndef WORKTIPS_INTEGRATION_TEST_HOOKS_H
+#define WORKTIPS_INTEGRATION_TEST_HOOKS_H
 
 //
 // Header
@@ -19,7 +19,7 @@
 #include "command_line.h"
 #include "shoom.h"
 
-namespace loki
+namespace worktips
 {
 struct fixed_buffer
 {
@@ -49,14 +49,14 @@ extern struct integration_test_t
   bool disable_obligation_checkpointing;
 } integration_test;
 
-}; // namespace loki
+}; // namespace worktips
 
-#endif // LOKI_INTEGRATION_TEST_HOOKS_H
+#endif // WORKTIPS_INTEGRATION_TEST_HOOKS_H
 
 //
 // CPP Implementation
 //
-#ifdef LOKI_INTEGRATION_TEST_HOOKS_IMPLEMENTATION
+#ifdef WORKTIPS_INTEGRATION_TEST_HOOKS_IMPLEMENTATION
 #include <string.h>
 #include <assert.h>
 #include <chrono>
@@ -78,7 +78,7 @@ static sem_t              *global_stdout_semaphore_handle;
 static sem_t              *global_stdout_ready_semaphore;
 static sem_t              *global_stdin_ready_semaphore;
 
-namespace loki
+namespace worktips
 {
 
 integration_test_t integration_test;
@@ -93,23 +93,23 @@ const command_line::arg_descriptor<std::string, false> arg_integration_test_hard
 const command_line::arg_descriptor<std::string, false> arg_integration_test_shared_mem_name = {
   "integration-test-shared-mem-name"
 , "Specify the shared memory base name for stdin, stdout and semaphore name"
-, "loki-default-integration-test-mem-name"
+, "worktips-default-integration-test-mem-name"
 , false
 };
 
 boost::mutex integration_test_mutex;
 
-} // namespace loki
+} // namespace worktips
 
 std::string global_stdin_semaphore_name;
 std::string global_stdout_semaphore_name;
 std::string global_stdout_ready_semaphore_name;
 std::string global_stdin_ready_semaphore_name;
 
-void loki::use_standard_cout()   { if (!global_std_cout) { global_std_cout = std::cout.rdbuf(); } std::cout.rdbuf(global_std_cout); }
-void loki::use_redirected_cout() { if (!global_std_cout) { global_std_cout = std::cout.rdbuf(); } std::cout.rdbuf(global_redirected_cout.rdbuf()); }
+void worktips::use_standard_cout()   { if (!global_std_cout) { global_std_cout = std::cout.rdbuf(); } std::cout.rdbuf(global_std_cout); }
+void worktips::use_redirected_cout() { if (!global_std_cout) { global_std_cout = std::cout.rdbuf(); } std::cout.rdbuf(global_redirected_cout.rdbuf()); }
 
-void loki::init_integration_test_context(const std::string &base_name)
+void worktips::init_integration_test_context(const std::string &base_name)
 {
   assert(base_name.size() > 0);
 
@@ -140,7 +140,7 @@ void loki::init_integration_test_context(const std::string &base_name)
     if (once_only)
     {
       once_only = false;
-      printf("Loki Integration Test: Shared memory %s has not been created yet, blocking ...\n", global_stdin_shared_mem->Path().c_str());
+      printf("Worktips Integration Test: Shared memory %s has not been created yet, blocking ...\n", global_stdin_shared_mem->Path().c_str());
     }
   }
 
@@ -149,12 +149,12 @@ void loki::init_integration_test_context(const std::string &base_name)
   global_stdout_ready_semaphore = sem_open(global_stdout_ready_semaphore_name.c_str(), O_CREAT, 0600, 0);
   global_stdin_ready_semaphore = sem_open(global_stdin_ready_semaphore_name.c_str(), O_CREAT, 0600, 0);
 
-  if (!global_stdin_semaphore_handle)  fprintf(stderr, "Loki Integration Test: Failed to initialise global_stdin_semaphore_handle\n");
-  if (!global_stdout_semaphore_handle) fprintf(stderr, "Loki Integration Test: Failed to initialise global_stdout_semaphore_handle\n");
-  if (!global_stdout_ready_semaphore) fprintf(stderr, "Loki Integration Test: Failed to initialise global_stdout_ready_semaphore_handle\n");
-  if (!global_stdin_ready_semaphore) fprintf(stderr, "Loki Integration Test: Failed to initialise global_stdin_ready_semaphore_handle\n");
+  if (!global_stdin_semaphore_handle)  fprintf(stderr, "Worktips Integration Test: Failed to initialise global_stdin_semaphore_handle\n");
+  if (!global_stdout_semaphore_handle) fprintf(stderr, "Worktips Integration Test: Failed to initialise global_stdout_semaphore_handle\n");
+  if (!global_stdout_ready_semaphore) fprintf(stderr, "Worktips Integration Test: Failed to initialise global_stdout_ready_semaphore_handle\n");
+  if (!global_stdin_ready_semaphore) fprintf(stderr, "Worktips Integration Test: Failed to initialise global_stdin_ready_semaphore_handle\n");
 
-  printf("Loki Integration Test: Hooks initialised into shared memory, %s, %s, %s, %s, %s, %s\n",
+  printf("Worktips Integration Test: Hooks initialised into shared memory, %s, %s, %s, %s, %s, %s\n",
       stdin_name.c_str(),
       stdout_name.c_str(),
       global_stdin_semaphore_name.c_str(),
@@ -163,7 +163,7 @@ void loki::init_integration_test_context(const std::string &base_name)
       global_stdout_ready_semaphore_name.c_str());
 }
 
-void loki::deinit_integration_test_context()
+void worktips::deinit_integration_test_context()
 {
   sem_unlink(global_stdin_semaphore_name.c_str());
   sem_unlink(global_stdout_semaphore_name.c_str());
@@ -175,7 +175,7 @@ uint32_t const MSG_MAGIC_BYTES = 0x7428da3f;
 void write_to_stdout_shared_mem(char const *buf, int buf_len)
 {
   assert(global_stdout_shared_mem);
-  assert(buf_len < loki::fixed_buffer::SIZE);
+  assert(buf_len < worktips::fixed_buffer::SIZE);
 
   int sem_value = 0;
   sem_getvalue(global_stdout_ready_semaphore, &sem_value);
@@ -215,7 +215,7 @@ static char *parse_message(char *msg_buf, int msg_buf_len)
   return ptr;
 }
 
-std::vector<std::string> loki::separate_stdin_to_space_delim_args(loki::fixed_buffer const *cmd)
+std::vector<std::string> worktips::separate_stdin_to_space_delim_args(worktips::fixed_buffer const *cmd)
 {
   std::vector<std::string> args;
   char const *start = cmd->data;
@@ -238,7 +238,7 @@ std::vector<std::string> loki::separate_stdin_to_space_delim_args(loki::fixed_bu
   return args;
 }
 
-loki::fixed_buffer loki::read_from_stdin_shared_mem()
+worktips::fixed_buffer worktips::read_from_stdin_shared_mem()
 {
   boost::unique_lock<boost::mutex> scoped_lock(integration_test_mutex);
 
@@ -272,7 +272,7 @@ loki::fixed_buffer loki::read_from_stdin_shared_mem()
   return result;
 }
 
-void loki::write_redirected_stdout_to_shared_mem()
+void worktips::write_redirected_stdout_to_shared_mem()
 {
   boost::unique_lock<boost::mutex> scoped_lock(integration_test_mutex);
 
@@ -288,6 +288,6 @@ void loki::write_redirected_stdout_to_shared_mem()
   use_redirected_cout();
 }
 
-#endif // LOKI_INTEGRATION_TEST_HOOKS_IMPLEMENTATION
-#endif // LOKI_ENABLE_INTEGRATION_TEST_HOOKS
+#endif // WORKTIPS_INTEGRATION_TEST_HOOKS_IMPLEMENTATION
+#endif // WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS
 

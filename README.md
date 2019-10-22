@@ -1,34 +1,34 @@
-# Loki
+# Worktips
 
 <p align="center">
-    <a href="https://github.com/loki-project/loki/commits/dev"><img alt="pipeline status" src="https://gitlab.com/lokiproject/loki/badges/dev/pipeline.svg" /></a>
+    <a href="https://github.com/worktips-project/worktips/commits/dev"><img alt="pipeline status" src="https://gitlab.com/worktipsproject/worktips/badges/dev/pipeline.svg" /></a>
 </p>
 
-Copyright (c) 2018 The Loki Project.   
+Copyright (c) 2018 The Worktips Project.   
 Portions Copyright (c) 2014-2019 The Monero Project.   
 Portions Copyright (c) 2012-2013 The Cryptonote developers.
 
 ## Development resources
 
-- Web: [loki.network](https://loki.network)
-- Telegram: [t.me/LokiCommunity](https://t.me/LokiCommunity)
-- Mail: [team@loki.network](mailto:team@loki.network)
-- GitHub: [https://github.com/loki-project/loki](https://github.com/loki-project/loki)
+- Web: [worktips.network](https://worktips.network)
+- Telegram: [t.me/WorktipsCommunity](https://t.me/WorktipsCommunity)
+- Mail: [team@worktips.network](mailto:team@worktips.network)
+- GitHub: [https://github.com/worktips-project/worktips](https://github.com/worktips-project/worktips)
 - Discord: [https://discord.gg/67GXfD6](https://discord.gg/67GXfD6)
 
 ## Vulnerability disclosure
 
-- Check out our [Vulnerability Response Process](https://loki-project.github.io/loki-docs/Contributing/VULNERABILITY_RESPONSE_LOKI), encourages prompt disclosure of any Vulnerabilities
+- Check out our [Vulnerability Response Process](https://worktips-project.github.io/worktips-docs/Contributing/VULNERABILITY_RESPONSE_WORKTIPS), encourages prompt disclosure of any Vulnerabilities
 
 ## Information
 
-Loki is a private cryptocurrency based on Monero. Loki currently offers an incentivised full node layer, over the coming months we will be looking to support a secondary p2p network (Lokinet) and a messenger that offers private communications based on the Signal protocol (Loki Messenger).
+Worktips is a private cryptocurrency based on Monero. Worktips currently offers an incentivised full node layer, over the coming months we will be looking to support a secondary p2p network (Worktipsnet) and a messenger that offers private communications based on the Signal protocol (Worktips Messenger).
 
 More information on the project can be found on the website and in the whitepaper.
 
-Loki is an open source project, and we encourage contributions from anyone with something to offer. For more information on contributing, please contact team@loki.network
+Worktips is an open source project, and we encourage contributions from anyone with something to offer. For more information on contributing, please contact team@worktips.network
 
-## Compiling Loki from source
+## Compiling Worktips from source
 
 ### Dependencies
 
@@ -81,15 +81,15 @@ FreeBSD one liner for required to build dependencies
 
 Clone recursively to pull-in needed submodule(s):
 
-`$ git clone --recursive https://github.com/loki-project/loki`
+`$ git clone --recursive https://github.com/worktips-project/worktips`
 
 If you already have a repo cloned, initialize and update:
 
-`$ cd loki && git submodule init && git submodule update`
+`$ cd worktips && git submodule init && git submodule update`
 
 ### Build instructions
 
-Loki uses the CMake build system and a top-level [Makefile](Makefile) that
+Worktips uses the CMake build system and a top-level [Makefile](Makefile) that
 invokes cmake commands as needed.
 
 #### On Linux and macOS
@@ -98,7 +98,7 @@ invokes cmake commands as needed.
 * Change to the root of the source code directory, change to the most recent release branch, and build:
 
     ```bash
-    cd loki
+    cd worktips
     git checkout master
     make
     ```
@@ -112,16 +112,16 @@ invokes cmake commands as needed.
     https://github.com/zeromq/cppzmq to `/usr/local/include` should fix that error.
 
     *Note*: The instructions above will compile the most stable release of the
-    Loki software. If you would like to use and test the most recent software,
+    Worktips software. If you would like to use and test the most recent software,
     use ```git checkout master```. The master branch may contain updates that are
     both unstable and incompatible with release software, though testing is always
     encouraged.
 
 * The resulting executables can be found in `build/release/bin`
 
-* Add `PATH="$PATH:$HOME/loki/build/release/bin"` to `.profile`
+* Add `PATH="$PATH:$HOME/worktips/build/release/bin"` to `.profile`
 
-* Run Loki with `lokid --detach`
+* Run Worktips with `worktipsd --detach`
 
 * **Optional**: build and run the test suite to verify the binaries:
 
@@ -157,7 +157,7 @@ Tested on a Raspberry Pi Zero with a clean install of minimal Raspbian Stretch (
 
 * `apt-get update && apt-get upgrade` to install all of the latest software
 
-* Install the dependencies for Loki from the 'Debian' column in the table above.
+* Install the dependencies for Worktips from the 'Debian' column in the table above.
 
 * Increase the system swap size:
 
@@ -170,11 +170,11 @@ Tested on a Raspberry Pi Zero with a clean install of minimal Raspbian Stretch (
 
 * If using an external hard disk without an external power supply, ensure it gets enough power to avoid hardware issues when syncing, by adding the line "max_usb_current=1" to /boot/config.txt
 
-* Clone Loki and checkout the most recent release version:
+* Clone Worktips and checkout the most recent release version:
 
     ```bash
-    git clone https://github.com/loki-project/loki.git
-    cd loki
+    git clone https://github.com/worktips-project/worktips.git
+    cd worktips
     git checkout master
     ```
 
@@ -188,15 +188,15 @@ Tested on a Raspberry Pi Zero with a clean install of minimal Raspbian Stretch (
 
 * The resulting executables can be found in `build/release/bin`
 
-* Add `PATH="$PATH:$HOME/loki/build/release/bin"` to `.profile`
+* Add `PATH="$PATH:$HOME/worktips/build/release/bin"` to `.profile`
 
-* Run Loki with `lokid --detach`
+* Run Worktips with `worktipsd --detach`
 
 * You may wish to reduce the size of the swap file after the build has finished, and delete the boost directory from your home directory
 
 #### *Note for Raspbian Jessie users:*
 
-If you are using the older Raspbian Jessie image, compiling Loki is a bit more complicated. The version of Boost available in the Debian Jessie repositories is too old to use with Loki, and thus you must compile a newer version yourself. The following explains the extra steps, and has been tested on a Raspberry Pi 2 with a clean install of minimal Raspbian Jessie.
+If you are using the older Raspbian Jessie image, compiling Worktips is a bit more complicated. The version of Boost available in the Debian Jessie repositories is too old to use with Worktips, and thus you must compile a newer version yourself. The following explains the extra steps, and has been tested on a Raspberry Pi 2 with a clean install of minimal Raspbian Jessie.
 
 * As before, `apt-get update && apt-get upgrade` to install all of the latest software, and increase the system swap size
 
@@ -208,7 +208,7 @@ If you are using the older Raspbian Jessie image, compiling Loki is a bit more c
     ```
 
 
-* Then, install the dependencies for Loki except `libunwind` and `libboost-all-dev`
+* Then, install the dependencies for Worktips except `libunwind` and `libboost-all-dev`
 
 * Install the latest version of boost (this may first require invoking `apt-get remove --purge libboost*` to remove a previous version if you're not using a clean install):
 
@@ -229,7 +229,7 @@ If you are using the older Raspbian Jessie image, compiling Loki is a bit more c
 
 * Wait ~4 hours
 
-* From here, follow the [general Raspberry Pi instructions](#on-the-raspberry-pi) from the "Clone loki and checkout most recent release version" step.
+* From here, follow the [general Raspberry Pi instructions](#on-the-raspberry-pi) from the "Clone worktips and checkout most recent release version" step.
 
 #### On Windows:
 
@@ -284,7 +284,7 @@ application.
 * To git clone, run:
 
     ```bash
-    git clone --recursive https://github.com/loki-project/loki.git
+    git clone --recursive https://github.com/worktips-project/worktips.git
     ```
 
 **Building**
@@ -292,10 +292,10 @@ application.
 * Change to the cloned directory, run:
 	
     ```bash
-    cd loki
+    cd worktips
     ```
 
-* If you would like a specific [version/tag](https://github.com/loki-project/loki/tags), do a git checkout for that version. eg. 'v3.0.6'. If you don't care about the version and just want binaries from master, skip this step:
+* If you would like a specific [version/tag](https://github.com/worktips-project/worktips/tags), do a git checkout for that version. eg. 'v3.0.6'. If you don't care about the version and just want binaries from master, skip this step:
 	
     ```bash
     git checkout v3.0.6
@@ -313,7 +313,7 @@ application.
     make release-static-win32
     ```
 
-* The resulting executables can be found in `build/<MinGW version>/<loki version>/release/bin`
+* The resulting executables can be found in `build/<MinGW version>/<worktips version>/release/bin`
 
 * **Optional**: to build Windows binaries suitable for debugging on a 64-bit system, run:
 
@@ -327,13 +327,13 @@ application.
     make debug-static-win32
     ```
 
-* The resulting executables can be found in `build/<MinGW version>/<loki version>/debug/bin`
+* The resulting executables can be found in `build/<MinGW version>/<worktips version>/debug/bin`
 
 ### On FreeBSD:
 
-The project can be built from scratch by following instructions for Linux above(but use `gmake` instead of `make`). If you are running loki in a jail you need to add the flag: `allow.sysvipc=1` to your jail configuration, otherwise lmdb will throw the error message: `Failed to open lmdb environment: Function not implemented`.
+The project can be built from scratch by following instructions for Linux above(but use `gmake` instead of `make`). If you are running worktips in a jail you need to add the flag: `allow.sysvipc=1` to your jail configuration, otherwise lmdb will throw the error message: `Failed to open lmdb environment: Function not implemented`.
 
-We expect to add Loki into the ports tree in the near future, which will aid in managing installations using ports or packages.
+We expect to add Worktips into the ports tree in the near future, which will aid in managing installations using ports or packages.
 
 ### On OpenBSD:
 
@@ -348,7 +348,7 @@ The doxygen and graphviz packages are optional and require the xbase set.
 The Boost package has a bug that will prevent librpc.a from building correctly. In order to fix this, you will have to Build boost yourself from scratch. Follow the directions here (under "Building Boost"):
 https://github.com/bitcoin/bitcoin/blob/master/doc/build-openbsd.md
 
-You will have to add the serialization, date_time, and regex modules to Boost when building as they are needed by Loki.
+You will have to add the serialization, date_time, and regex modules to Boost when building as they are needed by Worktips.
 
 To build: `env CC=egcc CXX=eg++ CPP=ecpp DEVELOPER_LOCAL_TOOLS=1 BOOST_ROOT=/path/to/the/boost/you/built make release-static-64`
 
@@ -421,7 +421,7 @@ cmake ..
 doas make install
 ```
 
-Build Loki:
+Build Worktips:
 ```bash
 env DEVELOPER_LOCAL_TOOLS=1 BOOST_ROOT=/usr/local make release-static
 ```
@@ -432,9 +432,9 @@ You will need to add a few packages to your system. `pkg_add cmake gmake zeromq 
 
 The doxygen and graphviz packages are optional and require the xbase set.
 
-Build loki: `env DEVELOPER_LOCAL_TOOLS=1 BOOST_ROOT=/usr/local gmake release-static`
+Build worktips: `env DEVELOPER_LOCAL_TOOLS=1 BOOST_ROOT=/usr/local gmake release-static`
 
-Note: you may encounter the following error, when compiling the latest version of loki as a normal user:
+Note: you may encounter the following error, when compiling the latest version of worktips as a normal user:
 
 ```
 LLVM ERROR: out of memory
@@ -460,13 +460,13 @@ Then you can run make as usual.
 
 ```bash
 # Build image (for ARM 32-bit)
-docker build -f utils/build_scripts/android32.Dockerfile -t loki-android .
+docker build -f utils/build_scripts/android32.Dockerfile -t worktips-android .
 # Build image (for ARM 64-bit)
-docker build -f utils/build_scripts/android64.Dockerfile -t loki-android .
+docker build -f utils/build_scripts/android64.Dockerfile -t worktips-android .
 # Create container
-docker create -it --name loki-android loki-android bash
+docker create -it --name worktips-android worktips-android bash
 # Get binaries
-docker cp loki-android:/src/build/release/bin .
+docker cp worktips-android:/src/build/release/bin .
 ```
 
 ### Building portable statically linked binaries
@@ -501,11 +501,11 @@ You can also cross-compile static binaries on Linux for Windows and macOS with t
 
 The required packages are the names for each toolchain on apt. Depending on your distro, they may have different names.
 
-Using `depends` might also be easier to compile Loki on Windows than using MSYS. Activate Windows Subsystem for Linux (WSL) with a distro (for example Ubuntu), install the apt build-essentials and follow the `depends` steps as depicted above.
+Using `depends` might also be easier to compile Worktips on Windows than using MSYS. Activate Windows Subsystem for Linux (WSL) with a distro (for example Ubuntu), install the apt build-essentials and follow the `depends` steps as depicted above.
 
 The produced binaries still link libc dynamically. If the binary is compiled on a current distribution, it might not run on an older distribution with an older installation of libc. Passing `-DBACKCOMPAT=ON` to cmake will make sure that the binary will run on systems having at least libc version 2.17.
 
-## Installing Loki from a package
+## Installing Worktips from a package
 
 **DISCLAIMER: These packages are not part of this repository or maintained by this project's contributors, and as such, do not go through the same review process to ensure their trustworthiness and security.**
 
@@ -515,32 +515,32 @@ Packages are available for
 
     ```bash
     # Build using all available cores
-    docker build -t loki-daemon-image .
+    docker build -t worktips-daemon-image .
     
     # or build using a specific number of cores (reduce RAM requirement)
-    docker build --build-arg NPROC=1 -t loki .
+    docker build --build-arg NPROC=1 -t worktips .
     
     # either run in foreground
-    docker run -it -v /loki/chain:/root/.loki -v /loki/wallet:/wallet -p 22022:22022 loki
+    docker run -it -v /worktips/chain:/root/.worktips -v /worktips/wallet:/wallet -p 22022:22022 worktips
     
     # or in background
-    docker run -it -d -v /loki/chain:/root/.loki -v /loki/wallet:/wallet -p 22022:22022 loki
+    docker run -it -d -v /worktips/chain:/root/.worktips -v /worktips/wallet:/wallet -p 22022:22022 worktips
     ```
 
 * The build needs 3 GB space.
 * Wait one hour or more. For docker, the collect_from_docker_container.sh script will automate downloading the binaries from the docker container.
 
-## Running lokid
+## Running worktipsd
 
 The build places the binary in `bin/` sub-directory within the build directory
 from which cmake was invoked (repository root by default). To run in
 foreground:
 
 ```bash
-./bin/lokid
+./bin/worktipsd
 ```
 
-To list all available options, run `./bin/lokid --help`.  Options can be
+To list all available options, run `./bin/worktipsd --help`.  Options can be
 specified either on the command line or in a configuration file passed by the
 `--config-file` argument.  To specify an option in the configuration file, add
 a line with the syntax `argumentname=value`, where `argumentname` is the name
@@ -549,18 +549,18 @@ of the argument without the leading dashes, for example `log-level=1`.
 To run in background:
 
 ```bash
-./bin/lokid --log-file lokid.log --detach
+./bin/worktipsd --log-file worktipsd.log --detach
 ```
 
 To run as a systemd service, copy
-[lokid.service](utils/systemd/lokid.service) to `/etc/systemd/system/` and
-[lokid.conf](utils/conf/lokid.conf) to `/etc/`. The [example
-service](utils/systemd/lokid.service) assumes that the user `loki` exists
+[worktipsd.service](utils/systemd/worktipsd.service) to `/etc/systemd/system/` and
+[worktipsd.conf](utils/conf/worktipsd.conf) to `/etc/`. The [example
+service](utils/systemd/worktipsd.service) assumes that the user `worktips` exists
 and its home is the data directory specified in the [example
-config](utils/conf/lokid.conf).
+config](utils/conf/worktipsd.conf).
 
 If you're on Mac, you may need to add the `--max-concurrency 1` option to
-loki-wallet-cli, and possibly lokid, if you get crashes refreshing.
+worktips-wallet-cli, and possibly worktipsd, if you get crashes refreshing.
 
 ## Internationalization
 
@@ -574,32 +574,32 @@ See [README.i18n.md](README.i18n.md).
 > used solely for relaying transactions received over local RPC. This provides
 > privacy and better protection against surrounding node (sybil) attacks.
 
-While Loki isn't made to integrate with Tor, it can be used wrapped with torsocks, by
+While Worktips isn't made to integrate with Tor, it can be used wrapped with torsocks, by
 setting the following configuration parameters and environment variables:
 
 * `--p2p-bind-ip 127.0.0.1` on the command line or `p2p-bind-ip=127.0.0.1` in
-  lokid.conf to disable listening for connections on external interfaces.
-* `--no-igd` on the command line or `no-igd=1` in lokid.conf to disable IGD
+  worktipsd.conf to disable listening for connections on external interfaces.
+* `--no-igd` on the command line or `no-igd=1` in worktipsd.conf to disable IGD
   (UPnP port forwarding negotiation), which is pointless with Tor.
 * `DNS_PUBLIC=tcp` or `DNS_PUBLIC=tcp://x.x.x.x` where x.x.x.x is the IP of the
   desired DNS server, for DNS requests to go over TCP, so that they are routed
-  through Tor. When IP is not specified, lokid uses the default list of
+  through Tor. When IP is not specified, worktipsd uses the default list of
   servers defined in [src/common/dns_utils.cpp](src/common/dns_utils.cpp).
-* `TORSOCKS_ALLOW_INBOUND=1` to tell torsocks to allow lokid to bind to interfaces
+* `TORSOCKS_ALLOW_INBOUND=1` to tell torsocks to allow worktipsd to bind to interfaces
    to accept connections from the wallet. On some Linux systems, torsocks
    allows binding to localhost by default, so setting this variable is only
    necessary to allow binding to local LAN/VPN interfaces to allow wallets to
    connect from remote hosts. On other systems, it may be needed for local wallets
    as well.
 * Do NOT pass `--detach` when running through torsocks with systemd, (see
-  [utils/systemd/lokid.service](utils/systemd/lokid.service) for details).
+  [utils/systemd/worktipsd.service](utils/systemd/worktipsd.service) for details).
 * If you use the wallet with a Tor daemon via the loopback IP (eg, 127.0.0.1:9050),
   then use `--untrusted-daemon` unless it is your own hidden service.
 
-Example command line to start lokid through Tor:
+Example command line to start worktipsd through Tor:
 
 ```bash
-DNS_PUBLIC=tcp torsocks lokid --p2p-bind-ip 127.0.0.1 --no-igd
+DNS_PUBLIC=tcp torsocks worktipsd --p2p-bind-ip 127.0.0.1 --no-igd
 ```
 
 ### Using Tor on Tails
@@ -610,13 +610,13 @@ allow inbound connections. Full example:
 
 ```bash
 sudo iptables -I OUTPUT 2 -p tcp -d 127.0.0.1 -m tcp --dport 22023 -j ACCEPT
-DNS_PUBLIC=tcp torsocks ./lokid --p2p-bind-ip 127.0.0.1 --no-igd --rpc-bind-ip 127.0.0.1 \
+DNS_PUBLIC=tcp torsocks ./worktipsd --p2p-bind-ip 127.0.0.1 --no-igd --rpc-bind-ip 127.0.0.1 \
     --data-dir /home/amnesia/Persistent/your/directory/to/the/blockchain
 ```
 
 ## Debugging
 
-This section contains general instructions for debugging failed installs or problems encountered with Loki. First ensure you are running the latest version built from the Github repo.
+This section contains general instructions for debugging failed installs or problems encountered with Worktips. First ensure you are running the latest version built from the Github repo.
 
 ### Obtaining stack traces and core dumps on Unix systems
 
@@ -629,7 +629,7 @@ Run the build.
 Once it stalls, enter the following command:
 
 ```bash
-gdb /path/to/lokid `pidof lokid`
+gdb /path/to/worktipsd `pidof worktipsd`
 ```
 
 Type `thread apply all bt` within gdb in order to obtain the stack trace
@@ -642,23 +642,23 @@ Enter `echo core | sudo tee /proc/sys/kernel/core_pattern` to stop cores from be
 
 Run the build.
 
-When it terminates with an output along the lines of "Segmentation fault (core dumped)", there should be a core dump file in the same directory as lokid. It may be named just `core`, or `core.xxxx` with numbers appended.
+When it terminates with an output along the lines of "Segmentation fault (core dumped)", there should be a core dump file in the same directory as worktipsd. It may be named just `core`, or `core.xxxx` with numbers appended.
 
 You can now analyse this core dump with `gdb` as follows:
 
 ```bash
-gdb /path/to/lokid /path/to/dumpfile`
+gdb /path/to/worktipsd /path/to/dumpfile`
 ```
 
 Print the stack trace with `bt`
 
-#### To run Loki within gdb:
+#### To run Worktips within gdb:
 
-Type `gdb /path/to/lokid`
+Type `gdb /path/to/worktipsd`
 
 Pass command-line options with `--args` followed by the relevant arguments
 
-Type `run` to run lokid
+Type `run` to run worktipsd
 
 ### Analysing memory corruption
 
@@ -666,17 +666,17 @@ There are two tools available:
 
 #### ASAN
 
-Configure Loki with the -D SANITIZE=ON cmake flag, eg:
+Configure Worktips with the -D SANITIZE=ON cmake flag, eg:
 
 ```bash
 cd build/debug && cmake -D SANITIZE=ON -D CMAKE_BUILD_TYPE=Debug ../..
 ```
 
-You can then run the loki tools normally. Performance will typically halve.
+You can then run the worktips tools normally. Performance will typically halve.
 
 #### valgrind
 
-Install valgrind and run as `valgrind /path/to/lokid`. It will be very slow.
+Install valgrind and run as `valgrind /path/to/worktipsd`. It will be very slow.
 
 ### LMDB
 
@@ -685,7 +685,7 @@ Instructions for debugging suspected blockchain corruption as per @HYC
 There is an `mdb_stat` command in the LMDB source that can print statistics about the database but it's not routinely built. This can be built with the following command:
 
 ```bash
-cd ~/loki/external/db_drivers/liblmdb && make
+cd ~/worktips/external/db_drivers/liblmdb && make
 ```
 
 The output of `mdb_stat -ea <path to blockchain dir>` will indicate inconsistencies in the blocks, block_heights and block_info table.

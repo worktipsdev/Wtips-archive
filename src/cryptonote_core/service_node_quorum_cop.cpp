@@ -1,4 +1,5 @@
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 //
 // All rights reserved.
 //
@@ -32,15 +33,15 @@
 #include "cryptonote_config.h"
 #include "cryptonote_core.h"
 #include "version.h"
-#include "common/loki.h"
+#include "common/worktips.h"
 #include "common/util.h"
 #include "net/local_ip.h"
 #include <boost/endian/conversion.hpp>
 
-#include "common/loki_integration_test_hooks.h"
+#include "common/worktips_integration_test_hooks.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "quorum_cop"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "quorum_cop"
 
 namespace service_nodes
 {
@@ -88,9 +89,9 @@ namespace service_nodes
     bool check_uptime_obligation     = true;
     bool check_checkpoint_obligation = true;
 
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
-    if (loki::integration_test.disable_obligation_uptime_proof) check_uptime_obligation = false;
-    if (loki::integration_test.disable_obligation_checkpointing) check_checkpoint_obligation = false;
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
+    if (worktips::integration_test.disable_obligation_uptime_proof) check_uptime_obligation = false;
+    if (worktips::integration_test.disable_obligation_checkpointing) check_checkpoint_obligation = false;
 #endif
 
     if (check_uptime_obligation && time_since_last_uptime_proof > UPTIME_PROOF_MAX_TIME_IN_SECONDS)
@@ -219,9 +220,9 @@ namespace service_nodes
     {
       quorum_type const type = static_cast<quorum_type>(i);
 
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
-      if (loki::integration_test.disable_checkpoint_quorum && type == quorum_type::checkpointing) continue;
-      if (loki::integration_test.disable_obligation_quorum && type == quorum_type::obligations) continue;
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
+      if (worktips::integration_test.disable_checkpoint_quorum && type == quorum_type::checkpointing) continue;
+      if (worktips::integration_test.disable_obligation_quorum && type == quorum_type::obligations) continue;
 #endif
 
       switch(type)
@@ -255,7 +256,7 @@ namespace service_nodes
                 cryptonote::block const &block = blocks[0];
                 if (start_time < static_cast<ptrdiff_t>(block.timestamp)) // NOTE: If we started up before receiving the block, we likely have the voting information, if not we probably don't.
                 {
-                  // TODO(loki): Temporary HF13 code, remove when we hit HF13 because we delete all HF12 checkpoints
+                  // TODO(worktips): Temporary HF13 code, remove when we hit HF13 because we delete all HF12 checkpoints
                   // and don't need conditionals for HF12/HF13 checkpointing code
                   std::vector<crypto::public_key> const &quorum_keys =
                       (obligations_height_hf_version >= cryptonote::network_version_13_enforce_checkpoints)
@@ -286,7 +287,7 @@ namespace service_nodes
             std::shared_ptr<const testing_quorum> quorum = m_core.get_testing_quorum(quorum_type::obligations, m_obligations_height);
             if (!quorum)
             {
-              // TODO(loki): Fatal error
+              // TODO(worktips): Fatal error
               LOG_ERROR("Obligations quorum for height: " << m_obligations_height << " was not cached in daemon!");
               continue;
             }
@@ -398,7 +399,7 @@ namespace service_nodes
                       // NOTE: Don't warn uptime proofs if the daemon is just
                       // recently started and is candidate for testing (i.e.
                       // restarting the daemon)
-                      if (!my_test_results.uptime_proved && live_time < LOKI_HOUR(1))
+                      if (!my_test_results.uptime_proved && live_time < WORKTIPS_HOUR(1))
                           continue;
 
                       LOG_PRINT_L0("Service Node (yours) is active but is not passing tests for quorum: " << m_obligations_height);
@@ -441,12 +442,12 @@ namespace service_nodes
               const std::shared_ptr<const testing_quorum> quorum = m_core.get_testing_quorum(quorum_type::checkpointing, m_last_checkpointed_height);
               if (!quorum)
               {
-                // TODO(loki): Fatal error
+                // TODO(worktips): Fatal error
                 LOG_ERROR("Checkpoint quorum for height: " << m_last_checkpointed_height << " was not cached in daemon!");
                 continue;
               }
 
-              // TODO(loki): Temporary HF13 code, remove when we hit HF13 because we delete all HF12 checkpoints and don't need conditionals for HF12/HF13 checkpointing code
+              // TODO(worktips): Temporary HF13 code, remove when we hit HF13 because we delete all HF12 checkpoints and don't need conditionals for HF12/HF13 checkpointing code
               std::vector<crypto::public_key> const &quorum_keys =
                   (checkpointed_height_hf_version >= cryptonote::network_version_13_enforce_checkpoints)
                       ? quorum->validators
@@ -586,7 +587,7 @@ namespace service_nodes
           // lock here makes it so.
 
           blockchain.lock();
-          LOKI_DEFER { blockchain.unlock(); };
+          WORKTIPS_DEFER { blockchain.unlock(); };
 
           bool update_checkpoint             = true;
           if (blockchain.get_checkpoint(vote.block_height, checkpoint) &&

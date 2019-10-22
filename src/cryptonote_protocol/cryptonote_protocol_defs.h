@@ -36,7 +36,7 @@
 #include "net/net_utils_base.h"
 #include "cryptonote_basic/blobdatatype.h"
 
-#include "common/loki.h"
+#include "common/worktips.h"
 
 namespace service_nodes
 {
@@ -122,7 +122,7 @@ namespace cryptonote
   /************************************************************************/
   /*                                                                      */
   /************************************************************************/
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   struct block_complete_entry
   {
     blobdata block;

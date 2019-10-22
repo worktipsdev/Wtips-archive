@@ -1,4 +1,4 @@
-# Copyright (c) 2018, The Loki Project
+# Copyright (c) 2018, The Worktips Project
 # Copyright (c) 2016-2019, The Monero Project
 #
 # All rights reserved.
@@ -35,9 +35,9 @@ set(serialization_headers)
 set(serialization_private_headers
   json_object.h)
 
-loki_private_headers(serialization
+worktips_private_headers(serialization
   ${serialization_private_headers})
-loki_add_library(serialization
+worktips_add_library(serialization
   ${serialization_sources}
   ${serialization_headers}
   ${serialization_private_headers})

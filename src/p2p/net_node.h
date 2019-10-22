@@ -273,7 +273,7 @@ namespace nodetool
   private:
     const std::vector<std::string> m_seed_nodes_list =
     {
-      // TODO(loki): "seeds.loki.network"
+      // TODO(worktips): "seeds.worktips.network"
     };
 
     bool islimitup=false;

@@ -334,7 +334,7 @@ bool gen_block_miner_tx_has_2_in::generate(std::vector<test_event_entry>& events
 
   transaction tmp_tx;
 
-  if (!loki_tx_builder(events, tmp_tx, blk_0r, miner_account, miner_account, blk_0.miner_tx.vout[0].amount, cryptonote::network_version_7).build())
+  if (!worktips_tx_builder(events, tmp_tx, blk_0r, miner_account, miner_account, blk_0.miner_tx.vout[0].amount, cryptonote::network_version_7).build())
     return false;
 
   MAKE_MINER_TX_MANUALLY(miner_tx, blk_0r);
@@ -361,7 +361,7 @@ bool gen_block_miner_tx_with_txin_to_key::generate(std::vector<test_event_entry>
   REWIND_BLOCKS(events, blk_1r, blk_1, miner_account);
 
   transaction tmp_tx;
-  if (!loki_tx_builder(events, tmp_tx, blk_1r, miner_account, miner_account, blk_1.miner_tx.vout[0].amount, cryptonote::network_version_7).build())
+  if (!worktips_tx_builder(events, tmp_tx, blk_1r, miner_account, miner_account, blk_1.miner_tx.vout[0].amount, cryptonote::network_version_7).build())
     return false;
 
   MAKE_MINER_TX_MANUALLY(miner_tx, blk_1);
@@ -438,7 +438,7 @@ static bool construct_miner_tx_with_extra_output(cryptonote::transaction& tx,
     tx.vin.push_back(in);
 
     // This will work, until size of constructed block is less then CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE
-    const int hard_fork_version = 7; // NOTE(loki): We know this test doesn't need the new block reward formula
+    const int hard_fork_version = 7; // NOTE(worktips): We know this test doesn't need the new block reward formula
     uint64_t block_reward, block_reward_unpenalized;
     if (!get_base_block_reward(0, 0, already_generated_coins, block_reward, block_reward_unpenalized, 1, 0)) {
         LOG_PRINT_L0("Block is too big");

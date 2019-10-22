@@ -17,7 +17,7 @@ then
   exit
 fi
 
-WORKING_DIR=loki-$version
+WORKING_DIR=worktips-$version
 
 echo "Working in $WORKING_DIR..."
 
@@ -32,11 +32,11 @@ curl --header 'PRIVATE-TOKEN: '"$TOKEN" "https://gitlab.com/api/v4/projects/7515
   do
     id=$(echo $line | cut -d' ' -f1)
     build=$(echo $line | cut -d' ' -f2)
-    curl -L --header 'PRIVATE-TOKEN: '"$TOKEN" "https://gitlab.com/lokiproject/loki/-/jobs/$id/artifacts/download" -o artifacts-$build.zip
+    curl -L --header 'PRIVATE-TOKEN: '"$TOKEN" "https://gitlab.com/worktipsproject/worktips/-/jobs/$id/artifacts/download" -o artifacts-$build.zip
     unzip artifacts-$build.zip
-    mv build/release/bin loki-$build-x64-$version
-    zip -r loki-$build-x64-$version.zip loki-$build-x64-$version
+    mv build/release/bin worktips-$build-x64-$version
+    zip -r worktips-$build-x64-$version.zip worktips-$build-x64-$version
   done
 
 echo '#### sha256sum'
-sha256sum loki-*-x64-$version.zip
+sha256sum worktips-*-x64-$version.zip

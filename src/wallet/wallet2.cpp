@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 // 
 // All rights reserved.
 // 
@@ -82,8 +83,8 @@ using namespace epee;
 
 #include "cryptonote_core/service_node_list.h"
 #include "cryptonote_core/service_node_rules.h"
-#include "common/loki.h"
-#include "common/loki_integration_test_hooks.h"
+#include "common/worktips.h"
+#include "common/worktips_integration_test_hooks.h"
 
 extern "C"
 {
@@ -94,8 +95,8 @@ using namespace std;
 using namespace crypto;
 using namespace cryptonote;
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "wallet.wallet2"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "wallet.wallet2"
 
 // used to choose when to stop adding outputs to a tx
 #define APPROXIMATE_INPUT_BYTES 80
@@ -107,9 +108,9 @@ using namespace cryptonote;
 #define CHACHA8_KEY_TAIL 0x8c
 #define CACHE_KEY_TAIL 0x8d
 
-#define UNSIGNED_TX_PREFIX "Loki unsigned tx set\004"
-#define SIGNED_TX_PREFIX "Loki signed tx set\004"
-#define MULTISIG_UNSIGNED_TX_PREFIX "Loki multisig unsigned tx set\001"
+#define UNSIGNED_TX_PREFIX "Worktips unsigned tx set\004"
+#define SIGNED_TX_PREFIX "Worktips signed tx set\004"
+#define MULTISIG_UNSIGNED_TX_PREFIX "Worktips multisig unsigned tx set\001"
 
 #define RECENT_OUTPUT_RATIO (0.5) // 50% of outputs are from the recent zone
 #define RECENT_OUTPUT_DAYS (1.8) // last 1.8 day makes up the recent zone (taken from monerolink.pdf, Miller et al)
@@ -120,11 +121,11 @@ using namespace cryptonote;
 
 #define SECOND_OUTPUT_RELATEDNESS_THRESHOLD 0.0f
 
-#define KEY_IMAGE_EXPORT_FILE_MAGIC "Loki key image export\002"
+#define KEY_IMAGE_EXPORT_FILE_MAGIC "Worktips key image export\002"
 
-#define MULTISIG_EXPORT_FILE_MAGIC "Loki multisig export\001"
+#define MULTISIG_EXPORT_FILE_MAGIC "Worktips multisig export\001"
 
-#define OUTPUT_EXPORT_FILE_MAGIC "Loki output export\003"
+#define OUTPUT_EXPORT_FILE_MAGIC "Worktips output export\003"
 
 #define SEGREGATION_FORK_HEIGHT 99999999
 #define TESTNET_SEGREGATION_FORK_HEIGHT 99999999
@@ -147,7 +148,7 @@ namespace
   std::string get_default_ringdb_path()
   {
     boost::filesystem::path dir = tools::get_default_data_dir();
-    // remove .loki, replace with .shared-ringdb
+    // remove .worktips, replace with .shared-ringdb
     dir = dir.remove_filename();
     dir /= ".shared-ringdb";
     return dir.string();
@@ -234,8 +235,8 @@ struct options {
   const command_line::arg_descriptor<bool> testnet = {"testnet", tools::wallet2::tr("For testnet. Daemon must also be launched with --testnet flag"), false};
   const command_line::arg_descriptor<bool> stagenet = {"stagenet", tools::wallet2::tr("For stagenet. Daemon must also be launched with --stagenet flag"), false};
 
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
-  const command_line::arg_descriptor<bool> fakenet = {"fakenet", tools::wallet2::tr("For loki integration tests, fakenet"), false};
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
+  const command_line::arg_descriptor<bool> fakenet = {"fakenet", tools::wallet2::tr("For worktips integration tests, fakenet"), false};
 #endif
 
   const command_line::arg_descriptor<std::string, false, true, 2> shared_ringdb_dir = {
@@ -297,10 +298,10 @@ std::unique_ptr<tools::wallet2> make_basic(const boost::program_options::variabl
   const bool stagenet = command_line::get_arg(vm, opts.stagenet);
   network_type nettype = testnet ? TESTNET : stagenet ? STAGENET : MAINNET;
 
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
   if (command_line::get_arg(vm, opts.fakenet))
   {
-    assert(!testnet &&!stagenet); // NOTE(loki): Developer error
+    assert(!testnet &&!stagenet); // NOTE(worktips): Developer error
     nettype = FAKECHAIN;
   }
 #endif
@@ -1141,7 +1142,7 @@ void wallet2::init_options(boost::program_options::options_description& desc_par
   command_line::add_arg(desc_params, opts.daemon_ssl_allow_chained);
   command_line::add_arg(desc_params, opts.testnet);
   command_line::add_arg(desc_params, opts.stagenet);
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
   command_line::add_arg(desc_params, opts.fakenet);
 #endif
   command_line::add_arg(desc_params, opts.shared_ringdb_dir);
@@ -1627,8 +1628,8 @@ void wallet2::scan_output(const cryptonote::transaction &tx, bool miner_tx, cons
     if (!m_encrypt_keys_after_refresh)
     {
       boost::optional<epee::wipeable_string> pwd = m_callback->on_get_password(pool ? "output found in pool" : "output received");
-      THROW_WALLET_EXCEPTION_IF(!pwd, error::password_needed, tr("Password is needed to compute key image for incoming loki"));
-      THROW_WALLET_EXCEPTION_IF(!verify_password(*pwd), error::password_needed, tr("Invalid password: password is needed to compute key image for incoming loki"));
+      THROW_WALLET_EXCEPTION_IF(!pwd, error::password_needed, tr("Password is needed to compute key image for incoming worktips"));
+      THROW_WALLET_EXCEPTION_IF(!verify_password(*pwd), error::password_needed, tr("Invalid password: password is needed to compute key image for incoming worktips"));
       decrypt_keys(*pwd);
       m_encrypt_keys_after_refresh = *pwd;
     }
@@ -1761,7 +1762,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
   // stored into m_transfers so we cannot determine if the entry in m_transfers
   // came from this transaction or a previous transaction.
 
-  // TODO(loki): This case might be feasible at all where a key image is
+  // TODO(worktips): This case might be feasible at all where a key image is
   // duplicated in the _same_ tx in different output indexes, because the
   // algorithm for making a key image uses the output index. Investigate, and if
   // it's not feasible to construct a malicious one without absolutely breaking
@@ -1852,7 +1853,7 @@ void wallet2::process_new_transaction(const crypto::hash &txid, const cryptonote
       continue;
     }
 
-    // NOTE(loki): (miner_tx && m_refresh_type == RefreshOptimiseCoinbase) used
+    // NOTE(worktips): (miner_tx && m_refresh_type == RefreshOptimiseCoinbase) used
     // to be an optimisation step that checks if the first output was destined
     // for us otherwise skip. This is not possible for us because our
     // block-reward now always has more than 1 output, mining, service node
@@ -6051,7 +6052,7 @@ std::string wallet2::transfers_to_csv(const std::vector<transfer_view>& transfer
         running_balance -= transfer.amount + transfer.fee;
         break;
       default:
-        MERROR("Warning: Unhandled pay type, this is most likely a developer error, please report it to the Loki developers.");
+        MERROR("Warning: Unhandled pay type, this is most likely a developer error, please report it to the Worktips developers.");
         break;
     }
 
@@ -6253,7 +6254,7 @@ bool wallet2::is_transfer_unlocked(uint64_t unlock_time, uint64_t block_height, 
   if (!is_connected())
     return true;
 
-  if (!key_image) // TODO(loki): Try make all callees always pass in a key image for accuracy
+  if (!key_image) // TODO(worktips): Try make all callees always pass in a key image for accuracy
     return true;
 
   blobdata binary_buf;
@@ -6771,7 +6772,7 @@ bool wallet2::sign_tx(unsigned_tx_set &exported_txs, std::vector<wallet2::pendin
     std::vector<crypto::secret_key> additional_tx_keys;
     rct::multisig_out msout;
 
-    loki_construct_tx_params tx_params = {};
+    worktips_construct_tx_params tx_params = {};
     tx_params.v4_allow_tx_types        = sd.v4_allow_tx_types;
     tx_params.v3_per_output_unlock     = sd.v3_per_output_unlock;
     tx_params.v2_rct                   = sd.v2_use_rct;
@@ -7250,7 +7251,7 @@ bool wallet2::sign_multisig_tx(multisig_tx_set &exported_txs, std::vector<crypto
     auto sources = sd.sources;
 
     rct::RCTConfig rct_config          = sd.rct_config;
-    loki_construct_tx_params tx_params = {};
+    worktips_construct_tx_params tx_params = {};
     tx_params.v4_allow_tx_types        = sd.v4_allow_tx_types;
     tx_params.v3_per_output_unlock     = sd.v3_per_output_unlock;
     tx_params.v2_rct                   = sd.v2_use_rct;
@@ -7379,9 +7380,9 @@ uint64_t wallet2::get_fee_multiplier(uint32_t priority, int fee_algorithm) const
       priority = 1;
   }
 
-  THROW_WALLET_EXCEPTION_IF(fee_algorithm < 0 || fee_algorithm >= (int)(loki::array_count(multipliers)), error::invalid_priority);
+  THROW_WALLET_EXCEPTION_IF(fee_algorithm < 0 || fee_algorithm >= (int)(worktips::array_count(multipliers)), error::invalid_priority);
   fee_multipliers_t const *curr_multiplier = multipliers + fee_algorithm;
-  if (priority >= 1 && priority <= (uint32_t)loki::array_count(curr_multiplier->values))
+  if (priority >= 1 && priority <= (uint32_t)worktips::array_count(curr_multiplier->values))
   {
     return curr_multiplier->values[priority-1];
   }
@@ -7439,7 +7440,7 @@ int wallet2::get_fee_algorithm() const
 uint64_t wallet2::adjust_mixin(uint64_t mixin) const
 {
   if (mixin != 9) {
-    MWARNING("Requested ring size " << (mixin + 1) << " incorrect for loki, using 10");
+    MWARNING("Requested ring size " << (mixin + 1) << " incorrect for worktips, using 10");
     mixin = 9;
   }
   return mixin;
@@ -7455,7 +7456,7 @@ uint32_t wallet2::adjust_priority(uint32_t priority)
       const uint64_t base_fee = get_base_fees().first;
       const uint64_t fee_multiplier = get_fee_multiplier(1);
       const double fee_level = fee_multiplier * base_fee;
-      // NOTE (Loki): We don't include the per-output fee here because we typically don't actually
+      // NOTE (Worktips): We don't include the per-output fee here because we typically don't actually
       // know how many outputs we will need yet, but it's okay: fee_level being too low will just
       // make us a little over-cautious about using low-priority but will still work fine when the
       // pool is empty.
@@ -7875,7 +7876,7 @@ wallet2::stake_result wallet2::check_stake_allowed(const crypto::public_key& sn_
   if (max_contrib_total == 0)
   {
     result.status = stake_result_status::service_node_contribution_maxed;
-    result.msg = tr("The service node cannot receive any more Loki from this wallet");
+    result.msg = tr("The service node cannot receive any more Worktips from this wallet");
     return result;
   }
 
@@ -7903,7 +7904,7 @@ wallet2::stake_result wallet2::check_stake_allowed(const crypto::public_key& sn_
       result.msg.reserve(128);
       result.msg =  tr("You must contribute at least ");
       result.msg += print_money(min_contrib_total);
-      result.msg += tr(" loki to become a contributor for this service node.");
+      result.msg += tr(" worktips to become a contributor for this service node.");
       return result;
     }
   }
@@ -7912,7 +7913,7 @@ wallet2::stake_result wallet2::check_stake_allowed(const crypto::public_key& sn_
   {
     result.msg += tr("You may only contribute up to ");
     result.msg += print_money(max_contrib_total);
-    result.msg += tr(" more loki to this service node. ");
+    result.msg += tr(" more worktips to this service node. ");
     result.msg += tr("Reducing your stake from ");
     result.msg += print_money(amount);
     result.msg += tr(" to ");
@@ -8205,7 +8206,7 @@ wallet2::register_service_node_result wallet2::create_register_service_node_tx(c
 
     try
     {
-      // NOTE(loki): We know the address should always be a primary address and has no payment id, so we can ignore the subaddress/payment id field here
+      // NOTE(worktips): We know the address should always be a primary address and has no payment id, so we can ignore the subaddress/payment id field here
       cryptonote::address_parse_info dest = {};
       dest.address                        = address;
 
@@ -8313,7 +8314,7 @@ wallet2::request_stake_unlock_result wallet2::can_request_stake_unlock(const cry
 
       result.msg.append("You are requesting to unlock a stake of: ");
       result.msg.append(cryptonote::print_money(contribution.amount));
-      result.msg.append(" Loki from the service node network.\nThis will schedule the service node: ");
+      result.msg.append(" Worktips from the service node network.\nThis will schedule the service node: ");
       result.msg.append(node_info.service_node_pubkey);
       result.msg.append(" for deactivation.");
       if (node_info.contributors.size() > 1) {
@@ -8393,7 +8394,7 @@ bool wallet2::tx_add_fake_output(std::vector<std::vector<tools::wallet2::get_out
   // check the keys are valid
   if (!rct::isInMainSubgroup(rct::pk2rct(output_public_key)))
   {
-    // TODO(loki): FIXME(loki): Payouts to the null service node address are
+    // TODO(worktips): FIXME(worktips): Payouts to the null service node address are
     // transactions constructed with an invalid public key and fail this check.
 
     // Technically we should not be mixing them- but in test environments like
@@ -8596,7 +8597,7 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
     {
       MWARNING("More than 5% of outputs are blacklisted ("
                << output_blacklist.size() << "/" << rct_offsets.size()
-               << "), please notify the Loki developers");
+               << "), please notify the Worktips developers");
     }
 
     if (!req_t.amounts.empty())
@@ -8970,7 +8971,7 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
           [](const get_outputs_out &a, const get_outputs_out &b) { return a.index < b.index; });
     }
 
-    if (ELPP->vRegistry()->allowed(el::Level::Debug, LOKI_DEFAULT_LOG_CATEGORY))
+    if (ELPP->vRegistry()->allowed(el::Level::Debug, WORKTIPS_DEFAULT_LOG_CATEGORY))
     {
       std::map<uint64_t, std::set<uint64_t>> outs;
       for (const auto &i: req.outputs)
@@ -9323,7 +9324,7 @@ void wallet2::transfer_selected_rct(std::vector<cryptonote::tx_destination_entry
   boost::optional<uint8_t> hf_version = get_hard_fork_version();
   THROW_WALLET_EXCEPTION_IF(!hf_version, error::get_hard_fork_version_error, "Failed to query current hard fork version");
 
-  loki_construct_tx_params tx_params(*hf_version);
+  worktips_construct_tx_params tx_params(*hf_version);
   tx_params.v3_is_staking_tx = is_staking_tx;
   bool r = cryptonote::construct_tx_and_get_tx_key(m_account.get_keys(), m_subaddresses, sources, splitted_dsts, change_dts, extra, tx, unlock_time, tx_key, additional_tx_keys, rct_config, m_multisig ? &msout : NULL, tx_params);
 
@@ -9832,7 +9833,7 @@ void wallet2::light_wallet_get_address_txs()
     address_tx.m_block_height = t.height;
     address_tx.m_unlock_time  = t.unlock_time;
     address_tx.m_timestamp = t.timestamp;
-    address_tx.m_type  = t.coinbase ? pay_type::miner : pay_type::in; // TODO(loki): Only accounts for miner, but wait, do we even care about this code? Looks like openmonero code
+    address_tx.m_type  = t.coinbase ? pay_type::miner : pay_type::in; // TODO(worktips): Only accounts for miner, but wait, do we even care about this code? Looks like openmonero code
     address_tx.m_mempool  = t.mempool;
     m_light_wallet_address_txs.emplace(tx_hash,address_tx);
 
@@ -9846,7 +9847,7 @@ void wallet2::light_wallet_get_address_txs()
       payment.m_block_height = t.height;
       payment.m_unlock_time  = t.unlock_time;
       payment.m_timestamp = t.timestamp;
-      payment.m_type = t.coinbase ? pay_type::miner : pay_type::in; // TODO(loki): Only accounts for miner, but wait, do we even care about this code? Looks like openmonero code
+      payment.m_type = t.coinbase ? pay_type::miner : pay_type::in; // TODO(worktips): Only accounts for miner, but wait, do we even care about this code? Looks like openmonero code
         
       if (t.mempool) {   
         if (std::find(unconfirmed_payments_txs.begin(), unconfirmed_payments_txs.end(), tx_hash) == unconfirmed_payments_txs.end()) {
@@ -12106,7 +12107,7 @@ bool wallet2::check_reserve_proof(const cryptonote::account_public_address &addr
     const cryptonote::txout_to_key* const out_key = boost::get<cryptonote::txout_to_key>(std::addressof(tx.vout[proof.index_in_tx].target));
     THROW_WALLET_EXCEPTION_IF(!out_key, error::wallet_internal_error, "Output key wasn't found")
 
-    // TODO(loki): We should make a catch-all function that gets all the public
+    // TODO(worktips): We should make a catch-all function that gets all the public
     // keys out into an array and iterate through all insteaad of multiple code
     // paths for additional keys and the main public key storage which can then
     // have multiple keys ..
@@ -12117,11 +12118,11 @@ bool wallet2::check_reserve_proof(const cryptonote::account_public_address &addr
     const bool is_miner = tx.vin.size() == 1 && tx.vin[0].type() == typeid(cryptonote::txin_gen);
     if (is_miner)
     {
-      // NOTE(loki): The service node reward is added as a duplicate TX public
+      // NOTE(worktips): The service node reward is added as a duplicate TX public
       // key instead of into the additional public key, so we need to check upto
       // 2 public keys when we're checking miner transactions.
 
-      // TODO(loki): This might still be broken for governance rewards since it uses a deterministic key iirc.
+      // TODO(worktips): This might still be broken for governance rewards since it uses a deterministic key iirc.
       crypto::public_key main_keys[2] = {
           get_tx_pub_key_from_extra(tx, 0),
           get_tx_pub_key_from_extra(tx, 1),
@@ -12531,7 +12532,7 @@ std::pair<size_t, std::vector<std::pair<crypto::key_image, crypto::signature>>> 
     crypto::public_key tx_pub_key;
     if (!try_get_tx_pub_key_using_td(td, tx_pub_key))
     {
-      // TODO(doyle): TODO(loki): Fallback to old get tx pub key method for
+      // TODO(doyle): TODO(worktips): Fallback to old get tx pub key method for
       // incase for now. But we need to go find out why we can't just use
       // td.m_pk_index for everything? If we were able to decode the output
       // using that, why not use it for everthing?
@@ -13082,7 +13083,7 @@ process:
     crypto::public_key tx_pub_key;
     if (!try_get_tx_pub_key_using_td(td, tx_pub_key))
     {
-      // TODO(doyle): TODO(loki): Fallback to old get tx pub key method for
+      // TODO(doyle): TODO(worktips): Fallback to old get tx pub key method for
       // incase for now. But we need to go find out why we can't just use
       // td.m_pk_index for everything? If we were able to decode the output
       // using that, why not use it for everthing?
@@ -13267,7 +13268,7 @@ crypto::key_image wallet2::get_multisig_composite_key_image(size_t n) const
   crypto::public_key tx_key;
   if (!try_get_tx_pub_key_using_td(td, tx_key))
   {
-    // TODO(doyle): TODO(loki): Fallback to old get tx pub key method for
+    // TODO(doyle): TODO(worktips): Fallback to old get tx pub key method for
     // incase for now. But we need to go find out why we can't just use
     // td.m_pk_index for everything? If we were able to decode the output
     // using that, why not use it for everthing?
@@ -13572,7 +13573,7 @@ std::string wallet2::make_uri(const std::string &address, const std::string &pay
     }
   }
 
-  std::string uri = "loki:" + address;
+  std::string uri = "worktips:" + address;
   unsigned int n_fields = 0;
 
   if (!payment_id.empty())
@@ -13601,9 +13602,9 @@ std::string wallet2::make_uri(const std::string &address, const std::string &pay
 //----------------------------------------------------------------------------------------------------
 bool wallet2::parse_uri(const std::string &uri, std::string &address, std::string &payment_id, uint64_t &amount, std::string &tx_description, std::string &recipient_name, std::vector<std::string> &unknown_parameters, std::string &error)
 {
-  if (uri.substr(0, 5) != "loki:")
+  if (uri.substr(0, 5) != "worktips:")
   {
-    error = std::string("URI has wrong scheme (expected \"loki:\"): ") + uri;
+    error = std::string("URI has wrong scheme (expected \"worktips:\"): ") + uri;
     return false;
   }
 
@@ -13906,7 +13907,7 @@ bool wallet2::generate_signature_for_request_stake_unlock(crypto::key_image cons
     crypto::public_key tx_pub_key;
     if (!try_get_tx_pub_key_using_td(td, tx_pub_key))
     {
-      // TODO(doyle): TODO(loki): Fallback to old get tx pub key method for
+      // TODO(doyle): TODO(worktips): Fallback to old get tx pub key method for
       // incase for now. But we need to go find out why we can't just use
       // td.m_pk_index for everything? If we were able to decode the output
       // using that, why not use it for everthing?

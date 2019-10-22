@@ -90,7 +90,7 @@ bool gen_bp_tx_validation_base::generate_with(std::vector<test_event_entry>& eve
     blk_r = blk_last;
   }
 
-  // NOTE(loki): Submit one more block. On the fork height, we allow exactly the
+  // NOTE(worktips): Submit one more block. On the fork height, we allow exactly the
   // forking block to contain borromean TX's, due to some clients constructing
   // old style TX's on the fork height. So make sure we create one block so that
   // the block containing bulletproofs txes, which is 1 block after the fork
@@ -140,7 +140,7 @@ bool gen_bp_tx_validation_base::generate_with(std::vector<test_event_entry>& eve
 
     tx_destination_entry change_addr{change_amount, from.get_keys().m_account_address, false /* is subaddr */ };
 
-    // NOTE(loki): Monero tests presume the generated TX doesn't have change so remove it from our output.
+    // NOTE(worktips): Monero tests presume the generated TX doesn't have change so remove it from our output.
     for (auto it = destinations.begin(); it != destinations.end(); ++it)
     {
       if (it->amount != change_amount) continue;
@@ -161,7 +161,7 @@ bool gen_bp_tx_validation_base::generate_with(std::vector<test_event_entry>& eve
       return false;
     }
 
-    loki_construct_tx_params tx_params(generator.m_hf_version);
+    worktips_construct_tx_params tx_params(generator.m_hf_version);
     if (!cryptonote::construct_tx_and_get_tx_key(
         from.get_keys(),
         subaddresses,
@@ -265,12 +265,12 @@ bool gen_bp_tx_validation_base::check_bp(const cryptonote::transaction &tx, size
 // have 1 output. So my fix is to make it so we don't generate a tx that makes
 // too high of a fee from the change amount.
 
-// Further addendum. In Loki hardfork 10, we also introduce batching governance
+// Further addendum. In Worktips hardfork 10, we also introduce batching governance
 // payments- so most block heights will remove the governance output from the
-// reward. So if we send less than the governance amount (~6ish loki from the
+// reward. So if we send less than the governance amount (~6ish worktips from the
 // start of the chain), then we'll eclipse the reward again and overflow, so
 // most of these tests have again been modified to ensure that we use atleast
-// 6 loki from the block reward.
+// 6 worktips from the block reward.
 //  - 2018/10/29
 
 bool gen_bp_tx_valid_1::generate(std::vector<test_event_entry>& events) const

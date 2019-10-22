@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2019, The Worktips Project
 // 
 // All rights reserved.
 // 
@@ -36,7 +37,7 @@
  */
 
 #ifdef _WIN32
- #define __STDC_FORMAT_MACROS // NOTE(loki): Explicitly define the PRIu64 macro on Mingw
+ #define __STDC_FORMAT_MACROS // NOTE(worktips): Explicitly define the PRIu64 macro on Mingw
 #endif
 
 #include <thread>
@@ -57,7 +58,7 @@
 #include "common/dns_utils.h"
 #include "common/base58.h"
 #include "common/scoped_message_writer.h"
-#include "common/loki_integration_test_hooks.h"
+#include "common/worktips_integration_test_hooks.h"
 #include "cryptonote_protocol/cryptonote_protocol_handler.h"
 #include "cryptonote_core/service_node_voting.h"
 #include "cryptonote_core/service_node_list.h"
@@ -97,12 +98,12 @@ using boost::lexical_cast;
 namespace po = boost::program_options;
 typedef cryptonote::simple_wallet sw;
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "wallet.simplewallet"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "wallet.simplewallet"
 
 #define EXTENDED_LOGS_FILE "wallet_details.log"
 
-#define OUTPUT_EXPORT_FILE_MAGIC "Loki output export\003"
+#define OUTPUT_EXPORT_FILE_MAGIC "Worktips output export\003"
 
 #define LOCK_IDLE_SCOPE() \
   bool auto_refresh_enabled = m_auto_refresh_enabled.load(std::memory_order_relaxed); \
@@ -158,7 +159,7 @@ namespace
   const command_line::arg_descriptor<bool> arg_allow_mismatched_daemon_version = {"allow-mismatched-daemon-version", sw::tr("Allow communicating with a daemon that uses a different RPC version"), false};
   const command_line::arg_descriptor<uint64_t> arg_restore_height = {"restore-height", sw::tr("Restore from specific blockchain height"), 0};
   const command_line::arg_descriptor<std::string> arg_restore_date = {"restore-date", sw::tr("Restore from estimated blockchain height on specified date"), ""};
-  const command_line::arg_descriptor<bool> arg_do_not_relay = {"do-not-relay", sw::tr("The newly created transaction will not be relayed to the loki network"), false};
+  const command_line::arg_descriptor<bool> arg_do_not_relay = {"do-not-relay", sw::tr("The newly created transaction will not be relayed to the worktips network"), false};
   const command_line::arg_descriptor<bool> arg_create_address_file = {"create-address-file", sw::tr("Create an address file for new wallets"), false};
   const command_line::arg_descriptor<std::string> arg_subaddress_lookahead = {"subaddress-lookahead", tools::wallet2::tr("Set subaddress lookahead sizes to <major>:<minor>"), ""};
   const command_line::arg_descriptor<bool> arg_use_english_language_names = {"use-english-language-names", sw::tr("Display English language names"), false};
@@ -228,7 +229,7 @@ namespace
   const char* USAGE_MMS("mms [<subcommand> [<subcommand_parameters>]]");
   const char* USAGE_MMS_INIT("mms init <required_signers>/<authorized_signers> <own_label> <own_transport_address>");
   const char* USAGE_MMS_INFO("mms info");
-  const char* USAGE_MMS_SIGNER("mms signer [<number> <label> [<transport_address> [<loki_address>]]]");
+  const char* USAGE_MMS_SIGNER("mms signer [<number> <label> [<transport_address> [<worktips_address>]]]");
   const char* USAGE_MMS_LIST("mms list");
   const char* USAGE_MMS_NEXT("mms next [sync]");
   const char* USAGE_MMS_SYNC("mms sync");
@@ -260,26 +261,26 @@ namespace
   const char* USAGE_HELP("help [<command>]");
 
   //
-  // Loki
+  // Worktips
   //
   const char* USAGE_REGISTER_SERVICE_NODE("register_service_node [index=<N1>[,<N2>,...]] [<priority>] <operator cut> <address1> <fraction1> [<address2> <fraction2> [...]] <expiration timestamp> <pubkey> <signature>");
   const char* USAGE_STAKE("stake [index=<N1>[,<N2>,...]] [<priority>] <service node pubkey> <amount|percent%>");
   const char* USAGE_REQUEST_STAKE_UNLOCK("request_stake_unlock <service_node_pubkey>");
   const char* USAGE_PRINT_LOCKED_STAKES("print_locked_stakes");
 
-#if defined (LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined (WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
   std::string input_line(const std::string &prompt, bool yesno = false)
   {
     std::string buf;
     if (yesno) std::cout << prompt << " (Y/Yes/N/No): ";
     else       std::cout << prompt << ": ";
-    loki::write_redirected_stdout_to_shared_mem();
-    loki::fixed_buffer buffer = loki::read_from_stdin_shared_mem();
+    worktips::write_redirected_stdout_to_shared_mem();
+    worktips::fixed_buffer buffer = worktips::read_from_stdin_shared_mem();
     buf.reserve(buffer.len);
     buf = buffer.data;
     return epee::string_tools::trim(buf);
   }
-#else // LOKI_ENABLE_INTEGRATION_TEST_HOOKS
+#else // WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS
   std::string input_line(const std::string& prompt, bool yesno = false)
   {
     std::string buf;
@@ -300,14 +301,14 @@ namespace
 
     return epee::string_tools::trim(buf);
   }
-#endif // LOKI_ENABLE_INTEGRATION_TEST_HOOKS
+#endif // WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS
 
   epee::wipeable_string input_secure_line(const char *prompt)
   {
-#if defined (LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined (WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
     std::cout << prompt;
-    loki::write_redirected_stdout_to_shared_mem();
-    loki::fixed_buffer buffer = loki::read_from_stdin_shared_mem();
+    worktips::write_redirected_stdout_to_shared_mem();
+    worktips::fixed_buffer buffer = worktips::read_from_stdin_shared_mem();
     epee::wipeable_string buf = buffer.data;
 #else
 
@@ -330,9 +331,9 @@ namespace
 
   boost::optional<tools::password_container> password_prompter(const char *prompt, bool verify)
   {
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
-    std::cout << prompt << ": NOTE(loki): Passwords not supported, defaulting to empty password";
-    loki::write_redirected_stdout_to_shared_mem();
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
+    std::cout << prompt << ": NOTE(worktips): Passwords not supported, defaulting to empty password";
+    worktips::write_redirected_stdout_to_shared_mem();
     tools::password_container pwd_container(std::string(""));
 #else
   #ifdef HAVE_READLINE
@@ -492,7 +493,7 @@ namespace
     std::stringstream prompt;
     prompt << sw::tr("For URL: ") << url
            << ", " << dnssec_str << std::endl
-           << sw::tr(" Loki Address = ") << addresses[0]
+           << sw::tr(" Worktips Address = ") << addresses[0]
            << std::endl
            << sw::tr("Is this OK?")
     ;
@@ -1623,7 +1624,7 @@ bool simple_wallet::export_raw_multisig(const std::vector<std::string> &args)
     for (auto &ptx: txs.m_ptx)
     {
       const crypto::hash txid = cryptonote::get_transaction_hash(ptx.tx);
-      const std::string filename = std::string("raw_multisig_loki_tx_") + epee::string_tools::pod_to_hex(txid);
+      const std::string filename = std::string("raw_multisig_worktips_tx_") + epee::string_tools::pod_to_hex(txid);
       if (!filenames.empty())
         filenames += ", ";
       filenames += filename;
@@ -2151,25 +2152,25 @@ bool simple_wallet::net_stats(const std::vector<std::string> &args)
 
 bool simple_wallet::welcome(const std::vector<std::string> &args)
 {
-  message_writer() << tr("Welcome to Loki, the private cryptocurrency based on Monero");
+  message_writer() << tr("Welcome to Worktips, the private cryptocurrency based on Monero");
   message_writer() << "";
-  message_writer() << tr("Loki, like Bitcoin, is a cryptocurrency. That is, it is digital money.");
-  message_writer() << tr("Unlike Bitcoin, your Loki transactions and balance stay private, and not visible to the world by default.");
+  message_writer() << tr("Worktips, like Bitcoin, is a cryptocurrency. That is, it is digital money.");
+  message_writer() << tr("Unlike Bitcoin, your Worktips transactions and balance stay private, and not visible to the world by default.");
   message_writer() << tr("However, you have the option of making those available to select parties, if you choose to.");
   message_writer() << "";
-  message_writer() << tr("Loki protects your privacy on the blockchain, and while Loki strives to improve all the time,");
-  message_writer() << tr("no privacy technology can be 100% perfect, Monero and consequently Loki included.");
-  message_writer() << tr("Loki cannot protect you from malware, and it may not be as effective as we hope against powerful adversaries.");
-  message_writer() << tr("Flaws in Loki may be discovered in the future, and attacks may be developed to peek under some");
-  message_writer() << tr("of the layers of privacy Loki provides. Be safe and practice defense in depth.");
+  message_writer() << tr("Worktips protects your privacy on the blockchain, and while Worktips strives to improve all the time,");
+  message_writer() << tr("no privacy technology can be 100% perfect, Monero and consequently Worktips included.");
+  message_writer() << tr("Worktips cannot protect you from malware, and it may not be as effective as we hope against powerful adversaries.");
+  message_writer() << tr("Flaws in Worktips may be discovered in the future, and attacks may be developed to peek under some");
+  message_writer() << tr("of the layers of privacy Worktips provides. Be safe and practice defense in depth.");
   message_writer() << "";
-  message_writer() << tr("Welcome to Loki and financial privacy. For more information, see https://loki.network");
+  message_writer() << tr("Welcome to Worktips and financial privacy. For more information, see https://worktips.network");
   return true;
 }
 
 bool simple_wallet::version(const std::vector<std::string> &args)
 {
-  message_writer() << "Loki '" << LOKI_RELEASE_NAME << "' (v" << LOKI_VERSION_FULL << ")";
+  message_writer() << "Worktips '" << WORKTIPS_RELEASE_NAME << "' (v" << WORKTIPS_VERSION_FULL << ")";
   return true;
 }
 
@@ -2383,7 +2384,7 @@ bool simple_wallet::set_unit(const std::vector<std::string> &args/* = std::vecto
   const std::string &unit = args[1];
   unsigned int decimal_point = CRYPTONOTE_DISPLAY_DECIMAL_POINT;
 
-  if (unit == "loki")
+  if (unit == "worktips")
     decimal_point = CRYPTONOTE_DISPLAY_DECIMAL_POINT;
   else if (unit == "megarok")
     decimal_point = CRYPTONOTE_DISPLAY_DECIMAL_POINT - 3;
@@ -2827,8 +2828,8 @@ simple_wallet::simple_wallet()
                                   "ask-password <0|1|2   (or never|action|decrypt)>\n "
                                   "  action: ask the password before many actions such as transfer, etc\n "
                                   "  decrypt: same as action, but keeps the spend key encrypted in memory when not needed\n "
-                                  "unit <loki|megarok|kilorok|rok>\n "
-                                  "  Set the default loki (sub-)unit.\n "
+                                  "unit <worktips|megarok|kilorok|rok>\n "
+                                  "  Set the default worktips (sub-)unit.\n "
                                   "min-outputs-count [n]\n "
                                   "  Try to keep at least that many outputs of value at least min-outputs-value.\n "
                                   "min-outputs-value [n]\n "
@@ -2844,12 +2845,12 @@ simple_wallet::simple_wallet()
                                   "auto-low-priority <1|0>\n "
                                   "  Whether to automatically use the low priority fee level when it's safe to do so.\n "
                                   "segregate-pre-fork-outputs <1|0>\n "
-                                  "  Set this if you intend to spend outputs on both Loki AND a key reusing fork.\n "
+                                  "  Set this if you intend to spend outputs on both Worktips AND a key reusing fork.\n "
                                   "key-reuse-mitigation2 <1|0>\n "
-                                  "  Set this if you are not sure whether you will spend on a key reusing Loki fork later.\n"
+                                  "  Set this if you are not sure whether you will spend on a key reusing Worktips fork later.\n"
                                   "subaddress-lookahead <major>:<minor>\n "
                                   "  Set the lookahead sizes for the subaddress hash table.\n "
-                                  "  Set this if you are not sure whether you will spend on a key reusing Loki fork later.\n "
+                                  "  Set this if you are not sure whether you will spend on a key reusing Worktips fork later.\n "
                                   "segregation-height <n>\n "
                                   "  Set to the height of a key reusing fork you want to use, 0 to use default."));
   m_cmd_binder.set_handler("encrypted_seed",
@@ -3040,7 +3041,7 @@ simple_wallet::simple_wallet()
   m_cmd_binder.set_handler("mms signer",
                            boost::bind(&simple_wallet::mms, this, _1),
                            tr(USAGE_MMS_SIGNER),
-                           tr("Set or modify authorized signer info (single-word label, transport address, Loki address), or list all signers"));
+                           tr("Set or modify authorized signer info (single-word label, transport address, Worktips address), or list all signers"));
   m_cmd_binder.set_handler("mms list",
                            boost::bind(&simple_wallet::mms, this, _1),
                            tr(USAGE_MMS_LIST),
@@ -3164,12 +3165,12 @@ simple_wallet::simple_wallet()
                            tr("Show the help section or the documentation about a <command>."));
 
   //
-  // Loki
+  // Worktips
   //
   m_cmd_binder.set_handler("register_service_node",
                            boost::bind(&simple_wallet::register_service_node, this, _1),
                            tr(USAGE_REGISTER_SERVICE_NODE),
-                           tr("Send <amount> to this wallet's main account and lock it as an operator stake for a new Service Node. This command is typically generated on the Service Node via the `prepare_registration' lokid command. The optional index= and <priority> parameters work as in the `transfer' command."));
+                           tr("Send <amount> to this wallet's main account and lock it as an operator stake for a new Service Node. This command is typically generated on the Service Node via the `prepare_registration' worktipsd command. The optional index= and <priority> parameters work as in the `transfer' command."));
   m_cmd_binder.set_handler("stake",
                            boost::bind(&simple_wallet::stake, this, _1),
                            tr(USAGE_STAKE),
@@ -3234,7 +3235,7 @@ bool simple_wallet::set_variable(const std::vector<std::string> &args)
     success_msg_writer() << "segregation-height = " << m_wallet->segregation_height();
     success_msg_writer() << "ignore-fractional-outputs = " << m_wallet->ignore_fractional_outputs();
     success_msg_writer() << "track-uses = " << m_wallet->track_uses();
-    success_msg_writer() << "setup-background-mining = " << setup_background_mining_string + tr(" (set this to support the network and to get a chance to receive new Loki)");
+    success_msg_writer() << "setup-background-mining = " << setup_background_mining_string + tr(" (set this to support the network and to get a chance to receive new Worktips)");
     success_msg_writer() << "device_name = " << m_wallet->device_name();
     return true;
   }
@@ -3276,7 +3277,7 @@ bool simple_wallet::set_variable(const std::vector<std::string> &args)
     CHECK_SIMPLE_VARIABLE("priority", set_default_priority, tr("0, 1, 2, 3, or 4, or one of ") << join_priority_strings(", "));
     CHECK_SIMPLE_VARIABLE("confirm-missing-payment-id", set_confirm_missing_payment_id, tr("0 or 1"));
     CHECK_SIMPLE_VARIABLE("ask-password", set_ask_password, tr("0|1|2 (or never|action|decrypt)"));
-    CHECK_SIMPLE_VARIABLE("unit", set_unit, tr("loki, megarok, kilorok, rok"));
+    CHECK_SIMPLE_VARIABLE("unit", set_unit, tr("worktips, megarok, kilorok, rok"));
     CHECK_SIMPLE_VARIABLE("min-outputs-count", set_min_output_count, tr("unsigned integer"));
     CHECK_SIMPLE_VARIABLE("min-outputs-value", set_min_output_value, tr("amount"));
     CHECK_SIMPLE_VARIABLE("merge-destinations", set_merge_destinations, tr("0 or 1"));
@@ -4067,7 +4068,7 @@ bool simple_wallet::init(const boost::program_options::variables_map& vm)
   m_wallet->callback(this);
 
   if (welcome)
-    message_writer(console_color_yellow, true) << tr("If you are new to Loki, type \"welcome\" for a brief overview.");
+    message_writer(console_color_yellow, true) << tr("If you are new to Worktips, type \"welcome\" for a brief overview.");
 
   if (m_long_payment_id_support)
   {
@@ -4291,7 +4292,7 @@ boost::optional<epee::wipeable_string> simple_wallet::new_wallet(const boost::pr
     "To start synchronizing with the daemon, use the \"refresh\" command.\n"
     "Use the \"help\" command to see the list of available commands.\n"
     "Use \"help <command>\" to see a command's documentation.\n"
-    "Always use the \"exit\" command when closing loki-wallet-cli to save \n"
+    "Always use the \"exit\" command when closing worktips-wallet-cli to save \n"
     "your current session's state. Otherwise, you might need to synchronize \n"
     "your wallet again (your wallet keys are NOT at risk in any case).\n")
   ;
@@ -4657,7 +4658,7 @@ void simple_wallet::start_background_mining()
       return;
     }
   }
-  success_msg_writer() << tr("Background mining enabled. Thank you for supporting the Loki network.");
+  success_msg_writer() << tr("Background mining enabled. Thank you for supporting the Worktips network.");
 }
 //----------------------------------------------------------------------------------------------------
 void simple_wallet::stop_background_mining()
@@ -4726,7 +4727,7 @@ void simple_wallet::check_background_mining(const epee::wipeable_string &passwor
   {
     message_writer() << tr("The daemon is not set up to background mine.");
     message_writer() << tr("With background mining enabled, the daemon will mine when idle and not on batttery.");
-    message_writer() << tr("Enabling this supports the network you are using, and makes you eligible for receiving new Loki");
+    message_writer() << tr("Enabling this supports the network you are using, and makes you eligible for receiving new Worktips");
     std::string accepted = input_line(tr("Do you want to do it now? (Y/Yes/N/No)"));
     if (std::cin.eof() || !command_line::is_yes(accepted)) {
       m_wallet->setup_background_mining(tools::wallet2::BackgroundMiningNo);
@@ -5726,7 +5727,7 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
     }
     else
     {
-      if (boost::starts_with(local_args[i], "loki:"))
+      if (boost::starts_with(local_args[i], "worktips:"))
         fail_msg_writer() << tr("Invalid last argument: ") << local_args.back() << ": " << error;
       else
         fail_msg_writer() << tr("Invalid last argument: ") << local_args.back();
@@ -5976,7 +5977,7 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
     }
     else if (m_wallet->multisig())
     {
-      bool r = m_wallet->save_multisig_tx(ptx_vector, "multisig_loki_tx");
+      bool r = m_wallet->save_multisig_tx(ptx_vector, "multisig_worktips_tx");
       if (!r)
       {
         fail_msg_writer() << tr("Failed to write transaction(s) to file");
@@ -5984,7 +5985,7 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
       }
       else
       {
-        success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "multisig_loki_tx";
+        success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "multisig_worktips_tx";
       }
     }
     else if (m_wallet->get_account().get_device().has_tx_cold_sign())
@@ -6013,7 +6014,7 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
     }
     else if (m_wallet->watch_only())
     {
-      bool r = m_wallet->save_tx(ptx_vector, "unsigned_loki_tx");
+      bool r = m_wallet->save_tx(ptx_vector, "unsigned_worktips_tx");
       if (!r)
       {
         fail_msg_writer() << tr("Failed to write transaction(s) to file");
@@ -6021,7 +6022,7 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
       }
       else
       {
-        success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "unsigned_loki_tx";
+        success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "unsigned_worktips_tx";
       }
     }
     else
@@ -6273,8 +6274,8 @@ bool simple_wallet::request_stake_unlock(const std::vector<std::string> &args_)
   std::vector<tools::wallet2::pending_tx> ptx_vector = {unlock_result.ptx};
   if (m_wallet->watch_only())
   {
-    if (m_wallet->save_tx(ptx_vector, "unsigned_loki_tx"))
-      success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "unsigned_loki_tx";
+    if (m_wallet->save_tx(ptx_vector, "unsigned_worktips_tx"))
+      success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "unsigned_worktips_tx";
     else
       fail_msg_writer() << tr("Failed to write transaction(s) to file");
 
@@ -6501,26 +6502,26 @@ bool simple_wallet::sweep_unmixable(const std::vector<std::string> &args_)
     // actually commit the transactions
     if (m_wallet->multisig())
     {
-      bool r = m_wallet->save_multisig_tx(ptx_vector, "multisig_loki_tx");
+      bool r = m_wallet->save_multisig_tx(ptx_vector, "multisig_worktips_tx");
       if (!r)
       {
         fail_msg_writer() << tr("Failed to write transaction(s) to file");
       }
       else
       {
-        success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "multisig_loki_tx";
+        success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "multisig_worktips_tx";
       }
     }
     else if (m_wallet->watch_only())
     {
-      bool r = m_wallet->save_tx(ptx_vector, "unsigned_loki_tx");
+      bool r = m_wallet->save_tx(ptx_vector, "unsigned_worktips_tx");
       if (!r)
       {
         fail_msg_writer() << tr("Failed to write transaction(s) to file");
       }
       else
       {
-        success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "unsigned_loki_tx";
+        success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "unsigned_worktips_tx";
       }
     }
     else
@@ -6628,14 +6629,14 @@ bool simple_wallet::sweep_main_internal(sweep_type_t sweep_type, std::vector<too
   bool submitted_to_network = false;
   if (m_wallet->multisig())
   {
-    bool r = m_wallet->save_multisig_tx(ptx_vector, "multisig_loki_tx");
+    bool r = m_wallet->save_multisig_tx(ptx_vector, "multisig_worktips_tx");
     if (!r)
     {
       fail_msg_writer() << tr("Failed to write transaction(s) to file");
     }
     else
     {
-      success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "multisig_loki_tx";
+      success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "multisig_worktips_tx";
     }
   }
   else if (m_wallet->get_account().get_device().has_tx_cold_sign())
@@ -6665,14 +6666,14 @@ bool simple_wallet::sweep_main_internal(sweep_type_t sweep_type, std::vector<too
   }
   else if (m_wallet->watch_only())
   {
-    bool r = m_wallet->save_tx(ptx_vector, "unsigned_loki_tx");
+    bool r = m_wallet->save_tx(ptx_vector, "unsigned_worktips_tx");
     if (!r)
     {
       fail_msg_writer() << tr("Failed to write transaction(s) to file");
     }
     else
     {
-      success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "unsigned_loki_tx";
+      success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "unsigned_worktips_tx";
     }
   }
   else
@@ -7237,7 +7238,7 @@ bool simple_wallet::sign_transfer(const std::vector<std::string> &args_)
   std::vector<tools::wallet2::pending_tx> ptx;
   try
   {
-    bool r = m_wallet->sign_tx("unsigned_loki_tx", "signed_loki_tx", ptx, [&](const tools::wallet2::unsigned_tx_set &tx){ return accept_loaded_tx(tx); }, export_raw);
+    bool r = m_wallet->sign_tx("unsigned_worktips_tx", "signed_worktips_tx", ptx, [&](const tools::wallet2::unsigned_tx_set &tx){ return accept_loaded_tx(tx); }, export_raw);
     if (!r)
     {
       fail_msg_writer() << tr("Failed to sign transaction");
@@ -7257,7 +7258,7 @@ bool simple_wallet::sign_transfer(const std::vector<std::string> &args_)
       txids_as_text += (", ");
     txids_as_text += epee::string_tools::pod_to_hex(get_transaction_hash(t.tx));
   }
-  success_msg_writer(true) << tr("Transaction successfully signed to file ") << "signed_loki_tx" << ", txid " << txids_as_text;
+  success_msg_writer(true) << tr("Transaction successfully signed to file ") << "signed_worktips_tx" << ", txid " << txids_as_text;
   if (export_raw)
   {
     std::string rawfiles_as_text;
@@ -7265,7 +7266,7 @@ bool simple_wallet::sign_transfer(const std::vector<std::string> &args_)
     {
       if (i > 0)
         rawfiles_as_text += ", ";
-      rawfiles_as_text += "signed_loki_tx_raw" + (ptx.size() == 1 ? "" : ("_" + std::to_string(i)));
+      rawfiles_as_text += "signed_worktips_tx_raw" + (ptx.size() == 1 ? "" : ("_" + std::to_string(i)));
     }
     success_msg_writer(true) << tr("Transaction raw hex data exported to ") << rawfiles_as_text;
   }
@@ -7285,7 +7286,7 @@ bool simple_wallet::submit_transfer(const std::vector<std::string> &args_)
   try
   {
     std::vector<tools::wallet2::pending_tx> ptx_vector;
-    bool r = m_wallet->load_tx("signed_loki_tx", ptx_vector, [&](const tools::wallet2::signed_tx_set &tx){ return accept_loaded_tx(tx); });
+    bool r = m_wallet->load_tx("signed_worktips_tx", ptx_vector, [&](const tools::wallet2::signed_tx_set &tx){ return accept_loaded_tx(tx); });
     if (!r)
     {
       fail_msg_writer() << tr("Failed to load transaction from file");
@@ -7435,7 +7436,7 @@ bool simple_wallet::get_tx_proof(const std::vector<std::string> &args)
   try
   {
     std::string sig_str = m_wallet->get_tx_proof(txid, info.address, info.is_subaddress, args.size() == 3 ? args[2] : "");
-    const std::string filename = "loki_tx_proof";
+    const std::string filename = "worktips_tx_proof";
     if (epee::file_io_utils::save_string_to_file(filename, sig_str))
       success_msg_writer() << tr("signature file saved to: ") << filename;
     else
@@ -7647,7 +7648,7 @@ bool simple_wallet::get_spend_proof(const std::vector<std::string> &args)
   try
   {
     const std::string sig_str = m_wallet->get_spend_proof(txid, args.size() == 2 ? args[1] : "");
-    const std::string filename = "loki_spend_proof";
+    const std::string filename = "worktips_spend_proof";
     if (epee::file_io_utils::save_string_to_file(filename, sig_str))
       success_msg_writer() << tr("signature file saved to: ") << filename;
     else
@@ -7736,7 +7737,7 @@ bool simple_wallet::get_reserve_proof(const std::vector<std::string> &args)
   try
   {
     const std::string sig_str = m_wallet->get_reserve_proof(account_minreserve, args.size() == 2 ? args[1] : "");
-    const std::string filename = "loki_reserve_proof";
+    const std::string filename = "worktips_reserve_proof";
     if (epee::file_io_utils::save_string_to_file(filename, sig_str))
       success_msg_writer() << tr("signature file saved to: ") << filename;
     else
@@ -8287,7 +8288,7 @@ std::string simple_wallet::get_prompt() const
 }
 //----------------------------------------------------------------------------------------------------
 
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
 #include <thread>
 #endif
 
@@ -8303,26 +8304,26 @@ bool simple_wallet::run()
 
   message_writer(console_color_green, false) << "Background refresh thread started";
 
-#if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
+#if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
   for (;;)
   {
-    loki::fixed_buffer const input = loki::read_from_stdin_shared_mem();
-    std::vector<std::string> args  = loki::separate_stdin_to_space_delim_args(&input);
+    worktips::fixed_buffer const input = worktips::read_from_stdin_shared_mem();
+    std::vector<std::string> args  = worktips::separate_stdin_to_space_delim_args(&input);
     {
-      boost::unique_lock<boost::mutex> scoped_lock(loki::integration_test_mutex);
-      loki::use_standard_cout();
+      boost::unique_lock<boost::mutex> scoped_lock(worktips::integration_test_mutex);
+      worktips::use_standard_cout();
       std::cout << input.data << std::endl;
-      loki::use_redirected_cout();
+      worktips::use_redirected_cout();
     }
 
     this->process_command(args);
     if (args.size() == 1 && args[0] == "exit")
     {
-      loki::deinit_integration_test_context();
+      worktips::deinit_integration_test_context();
       return true;
     }
 
-    loki::write_redirected_stdout_to_shared_mem();
+    worktips::write_redirected_stdout_to_shared_mem();
   }
 #endif
 
@@ -9398,7 +9399,7 @@ void simple_wallet::interrupt()
 void simple_wallet::commit_or_save(std::vector<tools::wallet2::pending_tx>& ptx_vector, bool do_not_relay)
 {
   size_t i = 0;
-  std::string msg_buf; // NOTE(loki): Buffer output so integration tests read the entire output
+  std::string msg_buf; // NOTE(worktips): Buffer output so integration tests read the entire output
   msg_buf.reserve(128);
 
   while (!ptx_vector.empty())
@@ -9411,7 +9412,7 @@ void simple_wallet::commit_or_save(std::vector<tools::wallet2::pending_tx>& ptx_
       cryptonote::blobdata blob;
       tx_to_blob(ptx.tx, blob);
       const std::string blob_hex = epee::string_tools::buff_to_hex_nodelimer(blob);
-      const std::string filename = "raw_loki_tx" + (ptx_vector.size() == 1 ? "" : ("_" + std::to_string(i++)));
+      const std::string filename = "raw_worktips_tx" + (ptx_vector.size() == 1 ? "" : ("_" + std::to_string(i++)));
       bool success = epee::file_io_utils::save_string_to_file(filename, blob_hex);
 
       if (success) msg_buf += tr("Transaction successfully saved to ");
@@ -9482,12 +9483,12 @@ int main(int argc, char* argv[])
   bool should_terminate = false;
   std::tie(vm, should_terminate) = wallet_args::main(
    argc, argv,
-   "loki-wallet-cli [--wallet-file=<filename>|--generate-new-wallet=<filename>] [<COMMAND>]",
-    sw::tr("This is the command line Loki wallet. It needs to connect to a Loki\ndaemon to work correctly.\n\nWARNING: Do not reuse your Loki keys on a contentious fork, doing so will harm your privacy.\n Only consider reusing your key on a contentious fork if the fork has key reuse mitigations built in."),
+   "worktips-wallet-cli [--wallet-file=<filename>|--generate-new-wallet=<filename>] [<COMMAND>]",
+    sw::tr("This is the command line Worktips wallet. It needs to connect to a Worktips\ndaemon to work correctly.\n\nWARNING: Do not reuse your Worktips keys on a contentious fork, doing so will harm your privacy.\n Only consider reusing your key on a contentious fork if the fork has key reuse mitigations built in."),
     desc_params,
     positional_options,
     [](const std::string &s, bool emphasis){ tools::scoped_message_writer(emphasis ? epee::console_color_white : epee::console_color_default, true) << s; },
-    "loki-wallet-cli.log"
+    "worktips-wallet-cli.log"
   );
 
   if (!vm)
@@ -9666,7 +9667,7 @@ void simple_wallet::list_mms_messages(const std::vector<mms::message> &messages)
 void simple_wallet::list_signers(const std::vector<mms::authorized_signer> &signers)
 {
   message_writer() << boost::format("%2s %-20s %-s") % tr("#") % tr("Label") % tr("Transport Address");
-  message_writer() << boost::format("%2s %-20s %-s") % "" % tr("Auto-Config Token") % tr("Loki Address");
+  message_writer() << boost::format("%2s %-20s %-s") % "" % tr("Auto-Config Token") % tr("Worktips Address");
   for (size_t i = 0; i < signers.size(); ++i)
   {
     const mms::authorized_signer &signer = signers[i];
@@ -9872,7 +9873,7 @@ void simple_wallet::mms_signer(const std::vector<std::string> &args)
   }
   if ((args.size() < 2) || (args.size() > 4))
   {
-    fail_msg_writer() << tr("mms signer [<number> <label> [<transport_address> [<loki_address>]]]");
+    fail_msg_writer() << tr("mms signer [<number> <label> [<transport_address> [<worktips_address>]]]");
     return;
   }
 
@@ -9891,14 +9892,14 @@ void simple_wallet::mms_signer(const std::vector<std::string> &args)
     bool ok = cryptonote::get_account_address_from_str_or_url(info, m_wallet->nettype(), args[3], oa_prompter);
     if (!ok)
     {
-      fail_msg_writer() << tr("Invalid Loki address");
+      fail_msg_writer() << tr("Invalid Worktips address");
       return;
     }
     monero_address = info.address;
     const std::vector<mms::message> &messages = ms.get_all_messages();
     if ((messages.size() > 0) || state.multisig)
     {
-      fail_msg_writer() << tr("Wallet state does not allow changing Loki addresses anymore");
+      fail_msg_writer() << tr("Wallet state does not allow changing Worktips addresses anymore");
       return;
     }
   }
