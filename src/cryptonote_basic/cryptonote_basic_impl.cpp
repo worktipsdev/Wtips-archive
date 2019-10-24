@@ -125,7 +125,7 @@ namespace cryptonote {
     static_assert(DIFFICULTY_TARGET_V2%60==0,"difficulty targets must be a multiple of 60");
 
   if (version == network_version_8)	{
-      uint64_t base_reward = block_reward_unpenalized_formula_v8(height)
+      base_reward = block_reward_unpenalized_formula_v8(height)
 	}
     if (version >= network_version_9_service_nodes)	{
       base_reward = block_reward_unpenalized_formula_v9(height)
