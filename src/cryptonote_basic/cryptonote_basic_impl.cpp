@@ -81,6 +81,9 @@ namespace cryptonote {
     return CRYPTONOTE_MAX_TX_SIZE;
   }
   //-----------------------------------------------------------------------------------------------
+  
+  uint64_t base_reward;
+  
   uint64_t block_reward_unpenalized_formula_v7(uint64_t already_generated_coins, uint64_t height)
   {
     uint64_t emission_supply_component = (already_generated_coins * EMISSION_SUPPLY_MULTIPLIER) / EMISSION_SUPPLY_DIVISOR;
