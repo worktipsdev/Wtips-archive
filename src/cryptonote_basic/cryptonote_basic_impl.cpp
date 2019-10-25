@@ -81,9 +81,6 @@ namespace cryptonote {
     return CRYPTONOTE_MAX_TX_SIZE;
   }
   //-----------------------------------------------------------------------------------------------
-  
-  uint64_t base_reward;
-  
   uint64_t block_reward_unpenalized_formula_v7(uint64_t already_generated_coins, uint64_t height)
   {
     uint64_t emission_supply_component = (already_generated_coins * EMISSION_SUPPLY_MULTIPLIER) / EMISSION_SUPPLY_DIVISOR;
@@ -127,19 +124,13 @@ namespace cryptonote {
 
     static_assert(DIFFICULTY_TARGET_V2%60==0,"difficulty targets must be a multiple of 60");
 
-  if (version == network_version_8)	{
-      base_reward = block_reward_unpenalized_formula_v8(height)
-	}
-    if (version >= network_version_9_service_nodes)	{
-      base_reward = block_reward_unpenalized_formula_v9(height)
-	}
-	if (version >= network_version_13_enforce_checkpoints)	{
-      base_reward = block_reward_unpenalized_formula_v13(height)
-	}
+uint64_t base_reward = version == network_version_8
+							? block_reward_unpenalized_formula_v8(height)
+							: version >= network_version_9_service_nodes && version <= network_version_11_infinite_staking
+							? block_reward_unpenalized_formula_v9(height)
+							: version >= network_version_12_checkpointing
+							? base_reward = block_reward_unpenalized_formula_v13(height);
 
-/*   uint64_t base_reward = version == network_version_8
-                               ? block_reward_unpenalized_formula_v8(height)
-                               : block_reward_unpenalized_formula_v7(already_generated_coins, height);*/
     uint64_t full_reward_zone = get_min_block_weight(version);
 
     //make it soft
