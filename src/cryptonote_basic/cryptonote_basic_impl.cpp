@@ -129,7 +129,7 @@ uint64_t base_reward = version == network_version_8
 							: version >= network_version_9_service_nodes && version <= network_version_11_infinite_staking
 							? block_reward_unpenalized_formula_v9(height)
 							: version >= network_version_12_checkpointing
-							? base_reward = block_reward_unpenalized_formula_v13(height);
+							? block_reward_unpenalized_formula_v13(height);
 
     uint64_t full_reward_zone = get_min_block_weight(version);
 
