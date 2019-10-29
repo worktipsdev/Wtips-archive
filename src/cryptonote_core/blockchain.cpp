@@ -1811,7 +1811,8 @@ bool Blockchain::handle_alternative_block(const block& b, const crypto::hash& id
     difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, block_height);
     CHECK_AND_ASSERT_MES(current_diff, false, "!!!!!!! DIFFICULTY OVERHEAD !!!!!!!");
     crypto::hash proof_of_work = null_hash;
-    if (b.major_version >= cryptonote::network_version_12_checkpointing)
+	get_block_longhash(this, b, proof_of_work, block_height, 0);
+    /*if (b.major_version >= cryptonote::network_version_12_checkpointing)
     {
       crypto::hash seedhash = null_hash;
       uint64_t seedheight = rx_seedheight(block_height);
@@ -1834,7 +1835,7 @@ bool Blockchain::handle_alternative_block(const block& b, const crypto::hash& id
     } else
     {
       get_block_longhash(this, b, proof_of_work, block_height, 0);
-    }
+    }*/
     if(!check_hash(proof_of_work, current_diff))
     {
       MERROR_VER("Block with id: " << id << std::endl << " for alternative chain, does not have enough proof of work: " << proof_of_work << std::endl << " expected difficulty: " << current_diff);

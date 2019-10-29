@@ -959,8 +959,8 @@ namespace cryptonote
     const uint8_t major_version = m_core.get_blockchain_storage().get_current_hard_fork_version();
 
     res.pow_algorithm =
-        major_version >= network_version_12_checkpointing    ? "RandomX (WORKTIPS variant)"               :
-        major_version == network_version_11_infinite_staking ? "Cryptonight Turtle Light (Variant 2)" :
+        /*major_version >= network_version_12_checkpointing    ? "RandomX (WORKTIPS variant)"               :*/
+        major_version >= network_version_11_infinite_staking ? "Cryptonight Turtle Light (Variant 2)" :
                                                                "Cryptonight Heavy (Variant 2)";
 
     if (res.is_background_mining_enabled)
@@ -1280,7 +1280,7 @@ namespace cryptonote
       return false;
     }
 
-    if (b.major_version >= network_version_12_checkpointing)
+    /*if (b.major_version >= network_version_12_checkpointing)
     {
       uint64_t seed_height, next_height;
       crypto::hash seed_hash;
@@ -1291,7 +1291,7 @@ namespace cryptonote
         seed_hash = m_core.get_block_id_by_height(next_height);
         res.next_seed_hash = string_tools::pod_to_hex(seed_hash);
       }
-    }
+    }*/
     res.difficulty = diff;
 
     blobdata block_blob = t_serializable_object_to_blob(b);
