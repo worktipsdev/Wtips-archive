@@ -1,4 +1,5 @@
 # Copyright (c) 2019, The Loki Project
+# Copyright (c) 2019, The Worktips Project
 #
 # All rights reserved.
 #
@@ -39,9 +40,9 @@ set(quorumnet_private_headers
   common.h
   conn_matrix.h)
 
-loki_private_headers(quorumnet
+worktips_private_headers(quorumnet
   ${quorumnet_private_headers})
-loki_add_library(quorumnet
+worktips_add_library(quorumnet
   ${quorumnet_sources}
   ${quorumnet_headers}
   ${quorumnet_private_headers})

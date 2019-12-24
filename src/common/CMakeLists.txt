@@ -1,3 +1,4 @@
+# Copyright (c) 2018, The Worktips Project
 # Copyright (c) 2018, The Loki Project
 # Copyright (c) 2014-2019, The Monero Project
 #
@@ -36,7 +37,7 @@ set(common_sources
   download.cpp
   error.cpp
   expect.cpp
-  loki.cpp
+  worktips.cpp
   util.cpp
   i18n.cpp
   rules.cpp
@@ -73,9 +74,9 @@ set(common_private_headers
   download.h
   error.h
   expect.h
-  loki.h
+  worktips.h
   http_connection.h
-  loki_integration_test_hooks.h
+  worktips_integration_test_hooks.h
   notify.h
   osrb.h
   pruning.h
@@ -97,9 +98,9 @@ set(common_private_headers
   timings.h
   combinator.h)
 
-loki_private_headers(common
+worktips_private_headers(common
   ${common_private_headers})
-loki_add_library(common
+worktips_add_library(common
   ${common_sources}
   ${common_headers}
   ${common_private_headers}

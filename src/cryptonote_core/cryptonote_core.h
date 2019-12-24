@@ -53,7 +53,7 @@
 PUSH_WARNINGS
 DISABLE_VS_WARNINGS(4355)
 
-#include "common/loki_integration_test_hooks.h"
+#include "common/worktips_integration_test_hooks.h"
 namespace cryptonote
 {
    struct test_options {
@@ -946,8 +946,8 @@ namespace cryptonote
       */
      bool set_storage_server_peer_reachable(crypto::public_key const &pubkey, bool value);
 
-     /// Time point at which the storage server and lokinet last pinged us
-     std::atomic<time_t> m_last_storage_server_ping, m_last_lokinet_ping;
+     /// Time point at which the storage server and worktipsnet last pinged us
+     std::atomic<time_t> m_last_storage_server_ping, m_last_worktipsnet_ping;
 
      /**
       * @brief attempts to relay any transactions in the mempool which need it

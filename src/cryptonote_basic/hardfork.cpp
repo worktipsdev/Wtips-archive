@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2018, The Worktips Project
 // 
 // All rights reserved.
 // 
@@ -30,13 +31,13 @@
 #include <algorithm>
 #include <cstdio>
 
-#include "common/loki.h"
+#include "common/worktips.h"
 #include "cryptonote_basic/cryptonote_basic.h"
 #include "blockchain_db/blockchain_db.h"
 #include "hardfork.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "hardfork"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "hardfork"
 
 using namespace cryptonote;
 
@@ -56,7 +57,7 @@ static uint8_t get_block_version(const cryptonote::block &b)
   return b.major_version;
 }
 
-// TODO(loki): Re-evaluate Hardfork as a class. Originally designed to
+// TODO(worktips): Re-evaluate Hardfork as a class. Originally designed to
 // handle voting, hardforks are now locked in, maybe we just need helper
 // functions on the hardcoded table instead of hiding everything behind
 // a class.
@@ -71,7 +72,7 @@ static constexpr HardFork::Params mainnet_hard_forks[] =
   { network_version_11_infinite_staking,    234767, 0, 1554170400 }, // 2019-03-26 13:00AEDT
   { network_version_12_checkpointing,       321467, 0, 1563940800 }, // 2019-07-24 14:00AEDT
   { network_version_13_enforce_checkpoints, 385824, 0, 1571850000 }, // 2019-10-23 19:00AEDT
-  // TODO: add v14 fork height; also remember to update hf_min_loki_versions in service_node_list
+  // TODO: add v14 fork height; also remember to update hf_min_worktips_versions in service_node_list
   // with the final 6.1.0 release version.
 };
 

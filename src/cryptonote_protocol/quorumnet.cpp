@@ -1,4 +1,5 @@
 // Copyright (c) 2019, The Loki Project
+// Copyright (c) 2019, The Worktips Project
 //
 // All rights reserved.
 //
@@ -39,8 +40,8 @@
 
 #include <shared_mutex>
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "qnet"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "qnet"
 
 namespace quorumnet {
 
@@ -145,10 +146,10 @@ constexpr el::Level easylogging_level(LogLevel level) {
     return el::Level::Unknown;
 };
 bool snn_want_log(LogLevel level) {
-    return ELPP->vRegistry()->allowed(easylogging_level(level), LOKI_DEFAULT_LOG_CATEGORY);
+    return ELPP->vRegistry()->allowed(easylogging_level(level), WORKTIPS_DEFAULT_LOG_CATEGORY);
 }
 void snn_write_log(LogLevel level, const char *file, int line, std::string msg) {
-    el::base::Writer(easylogging_level(level), file, line, ELPP_FUNC, el::base::DispatchAction::NormalLog).construct(LOKI_DEFAULT_LOG_CATEGORY) << msg;
+    el::base::Writer(easylogging_level(level), file, line, ELPP_FUNC, el::base::DispatchAction::NormalLog).construct(WORKTIPS_DEFAULT_LOG_CATEGORY) << msg;
 }
 
 void *new_snnwrapper(cryptonote::core &core, const std::string &bind) {

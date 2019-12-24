@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2018, The Worktips Project
 //
 // All rights reserved.
 //
@@ -49,8 +50,8 @@
 #include "common/perf_timer.h"
 #include "crypto/hash.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "txpool"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "txpool"
 
 DISABLE_VS_WARNINGS(4244 4345 4503) //'boost::foreach_detail_::or_' : decorated name length exceeded, name was truncated
 
@@ -220,7 +221,7 @@ namespace cryptonote
     }
     else
     {
-      // NOTE(loki): This is a developer error. If we come across this in production, be conservative and just reject
+      // NOTE(worktips): This is a developer error. If we come across this in production, be conservative and just reject
       MERROR("Unrecognised transaction type: " << tx.type << " for tx: " <<  get_transaction_hash(tx));
       return true;
     }
@@ -1436,7 +1437,7 @@ namespace cryptonote
       if (pool_tx.type == txtype::state_change &&
           get_service_node_state_change_from_tx_extra(pool_tx.extra, state_change, blk.major_version))
       {
-        // TODO(loki): PERF(loki): On pop_blocks we return all the TXs to the
+        // TODO(worktips): PERF(worktips): On pop_blocks we return all the TXs to the
         // pool. The greater the pop_blocks, the more txs that are queued in the
         // pool, and for every subsequent block you sync, get_transactions has
         // to allocate these transactions and we have to search every
@@ -1702,7 +1703,7 @@ namespace cryptonote
     fee = 0;
     
     //baseline empty block
-    loki_block_reward_context block_reward_context = {};
+    worktips_block_reward_context block_reward_context = {};
     block_reward_context.height                    = height;
     if (!m_blockchain.calc_batched_governance_reward(height, block_reward_context.batched_governance))
     {
@@ -1711,7 +1712,7 @@ namespace cryptonote
     }
 
     block_reward_parts reward_parts = {};
-    get_loki_block_reward(median_weight, total_weight, already_generated_coins, version, reward_parts, block_reward_context);
+    get_worktips_block_reward(median_weight, total_weight, already_generated_coins, version, reward_parts, block_reward_context);
     best_coinbase = reward_parts.base_miner;
 
     size_t max_total_weight = 2 * median_weight - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE;
@@ -1739,11 +1740,11 @@ namespace cryptonote
         continue;
       }
 
-      if (true /* version >= 5 -- always true for Loki */)
+      if (true /* version >= 5 -- always true for Worktips */)
       {
         // If we're getting lower coinbase tx, stop including more tx
         block_reward_parts reward_parts_other = {};
-        if(!get_loki_block_reward(median_weight, total_weight + meta.weight, already_generated_coins, version, reward_parts_other, block_reward_context))
+        if(!get_worktips_block_reward(median_weight, total_weight + meta.weight, already_generated_coins, version, reward_parts_other, block_reward_context))
         {
           LOG_PRINT_L2("  would exceed maximum block weight");
           continue;

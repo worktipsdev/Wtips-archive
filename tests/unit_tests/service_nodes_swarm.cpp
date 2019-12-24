@@ -1,4 +1,5 @@
 // Copyright (c) 2018, The Loki Project
+// Copyright (c) 2018, The Worktips Project
 // 
 // All rights reserved.
 // 
@@ -35,8 +36,8 @@
 #include <functional>
 #include <iterator>
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "sn_unit_tests"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "sn_unit_tests"
 
 using namespace service_nodes;
 

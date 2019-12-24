@@ -40,7 +40,7 @@ constexpr int CLOSE_LINGER = 5000;
 #define SN_LOG(level, stuff) do { if (want_logs(LogLevel::level)) { std::ostringstream o; o << stuff; logger(LogLevel::level, __FILE__, __LINE__, o.str()); } } while (0)
 
 // This is the domain used for listening service nodes.
-constexpr const char AUTH_DOMAIN_SN[] = "loki.sn";
+constexpr const char AUTH_DOMAIN_SN[] = "worktips.sn";
 
 #ifdef __cpp_lib_string_view
 using msg_view_t = std::string_view;

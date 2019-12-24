@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2019, The Monero Project
 // Copyright (c)      2018, The Loki Project
+// Copyright (c)      2018, The Worktips Project
 // 
 // All rights reserved.
 // 
@@ -38,10 +39,10 @@
 #include "wallet_rpc_server_error_codes.h"
 #include "wallet2.h"
 
-#include "common/loki.h"
+#include "common/worktips.h"
 
-#undef LOKI_DEFAULT_LOG_CATEGORY
-#define LOKI_DEFAULT_LOG_CATEGORY "wallet.rpc"
+#undef WORKTIPS_DEFAULT_LOG_CATEGORY
+#define WORKTIPS_DEFAULT_LOG_CATEGORY "wallet.rpc"
 
 // When making *any* change here, bump minor
 // If the change is incompatible, then bump major and set minor to 0
@@ -61,7 +62,7 @@ namespace wallet_rpc
 #define WALLET_RPC_STATUS_OK      "OK"
 #define WALLET_RPC_STATUS_BUSY    "BUSY"
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Return the wallet's balance.
   struct COMMAND_RPC_GET_BALANCE
   {
@@ -85,7 +86,7 @@ namespace wallet_rpc
       uint32_t address_index;       // Index of the subaddress in the account.
       std::string address;          // Address at this index. Base58 representation of the public keys.
       uint64_t balance;             // Balance for the subaddress (locked or unlocked).
-      uint64_t unlocked_balance;    // Unlocked funds are those funds that are sufficiently deep enough in the loki blockchain to be considered safe to spend.
+      uint64_t unlocked_balance;    // Unlocked funds are those funds that are sufficiently deep enough in the worktips blockchain to be considered safe to spend.
       std::string label;            // Label for the subaddress.
       uint64_t num_unspent_outputs; // Number of unspent outputs available for the subaddress.
       uint64_t blocks_to_unlock;    // The number of blocks remaining for the balance to unlock
@@ -105,7 +106,7 @@ namespace wallet_rpc
     struct response_t
     {
       uint64_t 	 balance;                              // The total balance (atomic units) of the currently opened wallet.
-      uint64_t 	 unlocked_balance;                     // Unlocked funds are those funds that are sufficiently deep enough in the loki blockchain to be considered safe to spend.
+      uint64_t 	 unlocked_balance;                     // Unlocked funds are those funds that are sufficiently deep enough in the worktips blockchain to be considered safe to spend.
       bool       multisig_import_needed;               // True if importing multisig data is needed for returning a correct balance.
       std::vector<per_subaddress_info> per_subaddress; // Balance information for each subaddress in an account.
       uint64_t blocks_to_unlock;                       // The number of blocks remaining for the balance to unlock
@@ -121,7 +122,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Return the wallet's addresses for an account. Optionally filter for specific set of subaddresses.
   struct COMMAND_RPC_GET_ADDRESS
   {
@@ -165,7 +166,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Get account and address indexes from a specific (sub)address.
   struct COMMAND_RPC_GET_ADDRESS_INDEX
   {
@@ -190,7 +191,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Create a new address for an account. Optionally, label the new address.
   struct COMMAND_RPC_CREATE_ADDRESS
   {
@@ -219,7 +220,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Label an address.
   struct COMMAND_RPC_LABEL_ADDRESS
   {
@@ -243,7 +244,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Get all accounts for a wallet. Optionally filter accounts by tag.
   struct COMMAND_RPC_GET_ACCOUNTS
   {
@@ -291,7 +292,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Create a new account with an optional label.
   struct COMMAND_RPC_CREATE_ACCOUNT
   {
@@ -318,7 +319,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Label an account.
   struct COMMAND_RPC_LABEL_ACCOUNT
   {
@@ -342,7 +343,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Get a list of user-defined account tags.
   struct COMMAND_RPC_GET_ACCOUNT_TAGS
   {
@@ -377,7 +378,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Apply a filtering tag to a list of accounts.
   struct COMMAND_RPC_TAG_ACCOUNTS
   {
@@ -401,7 +402,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Remove filtering tag from a list of accounts.
   struct COMMAND_RPC_UNTAG_ACCOUNTS
   {
@@ -423,7 +424,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Set description for an account tag.
   struct COMMAND_RPC_SET_ACCOUNT_TAG_DESCRIPTION
   {
@@ -447,7 +448,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Returns the wallet's current block height and blockchain immutable height
   struct COMMAND_RPC_GET_HEIGHT
   {
@@ -470,22 +471,22 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
-  // Send loki to a number of recipients. To preview the transaction fee, set do_not_relay to true and get_tx_metadata to true. 
+  WORKTIPS_RPC_DOC_INTROSPECT
+  // Send worktips to a number of recipients. To preview the transaction fee, set do_not_relay to true and get_tx_metadata to true. 
   // Submit the response using the data in get_tx_metadata in the RPC call, relay_tx.
   struct COMMAND_RPC_TRANSFER
   {
     struct request_t
     {
-      std::list<transfer_destination> destinations; // Array of destinations to receive LOKI.
+      std::list<transfer_destination> destinations; // Array of destinations to receive WORKTIPS.
       uint32_t account_index;                       // (Optional) Transfer from this account index. (Defaults to 0)
       std::set<uint32_t> subaddr_indices;           // (Optional) Transfer from this set of subaddresses. (Defaults to 0)
       uint32_t priority;                            // Set a priority for the transaction. Accepted Values are: default (1), or 0-3 for: unimportant, normal, elevated, priority.
-      uint64_t ring_size;                           // (Deprecated) Set to 10. Sets ringsize to n (mixin + 1). Loki ring_size is statically set to 10.
-      uint64_t unlock_time;                         // Number of blocks before the loki can be spent (0 to use the default lock time).
+      uint64_t ring_size;                           // (Deprecated) Set to 10. Sets ringsize to n (mixin + 1). Worktips ring_size is statically set to 10.
+      uint64_t unlock_time;                         // Number of blocks before the worktips can be spent (0 to use the default lock time).
       std::string payment_id;                       // (Optional) Random 64-character hex string to identify a transaction.
       bool get_tx_key;                              // (Optional) Return the transaction key after sending.
-      bool do_not_relay;                            // (Optional) If true, the newly created transaction will not be relayed to the loki network. (Defaults to false)
+      bool do_not_relay;                            // (Optional) If true, the newly created transaction will not be relayed to the worktips network. (Defaults to false)
       bool get_tx_hex;                              // Return the transaction as hex string after sending. (Defaults to false)
       bool get_tx_metadata;                         // Return the metadata needed to relay the transaction. (Defaults to false)
 
@@ -530,21 +531,21 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Same as transfer, but can split into more than one tx if necessary.
   struct COMMAND_RPC_TRANSFER_SPLIT
   {
     struct request_t
     {
-      std::list<transfer_destination> destinations; // Array of destinations to receive LOKI:
+      std::list<transfer_destination> destinations; // Array of destinations to receive WORKTIPS:
       uint32_t account_index;                       // (Optional) Transfer from this account index. (Defaults to 0)
       std::set<uint32_t> subaddr_indices;           // (Optional) Transfer from this set of subaddresses. (Defaults to 0)
       uint32_t priority;                            // Set a priority for the transactions. Accepted Values are: 0-3 for: default, unimportant, normal, elevated, priority.
-      uint64_t ring_size;                           // (Ignored) Sets ringsize to n (mixin + 1). Loki ring_size is statically set to 10.
-      uint64_t unlock_time;                         // Number of blocks before the loki can be spent (0 to not add a lock).
+      uint64_t ring_size;                           // (Ignored) Sets ringsize to n (mixin + 1). Worktips ring_size is statically set to 10.
+      uint64_t unlock_time;                         // Number of blocks before the worktips can be spent (0 to not add a lock).
       std::string payment_id;                       // (Optional) Random 32-byte/64-character hex string to identify a transaction.
       bool get_tx_keys;                             // (Optional) Return the transaction keys after sending.
-      bool do_not_relay;                            // (Optional) If true, the newly created transaction will not be relayed to the loki network. (Defaults to false)
+      bool do_not_relay;                            // (Optional) If true, the newly created transaction will not be relayed to the worktips network. (Defaults to false)
       bool get_tx_hex;                              // Return the transactions as hex string after sending.
       bool get_tx_metadata;                         // Return list of transaction metadata needed to relay the transfer later.
 
@@ -598,7 +599,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   struct COMMAND_RPC_DESCRIBE_TRANSFER
   {
     struct recipient
@@ -617,7 +618,7 @@ namespace wallet_rpc
       uint64_t amount_in;              // Amount in, in atomic units.
       uint64_t amount_out;             // amount out, in atomic units.
       uint32_t ring_size;              // Ring size of transfer.
-      uint64_t unlock_time;            // Number of blocks before the loki can be spent (0 represents the default network lock time).
+      uint64_t unlock_time;            // Number of blocks before the worktips can be spent (0 represents the default network lock time).
       std::list<recipient> recipients; // List of addresses and amounts.
       std::string payment_id;          // Payment ID matching the input parameter.
       uint64_t change_amount;          // Change received from transaction in atomic units.
@@ -664,7 +665,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Sign a transaction created on a read-only wallet (in cold-signing process).
   struct COMMAND_RPC_SIGN_TRANSFER
   {
@@ -699,7 +700,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Submit a previously signed transaction on a read-only wallet (in cold-signing process).
   struct COMMAND_RPC_SUBMIT_TRANSFER
   {
@@ -724,14 +725,14 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Send all dust outputs back to the wallet's, to make them easier to spend (and mix).
   struct COMMAND_RPC_SWEEP_DUST
   {
     struct request_t
     {
       bool get_tx_keys;     // (Optional) Return the transaction keys after sending.
-      bool do_not_relay;    // (Optional) If true, the newly created transaction will not be relayed to the loki network. (Defaults to false)
+      bool do_not_relay;    // (Optional) If true, the newly created transaction will not be relayed to the worktips network. (Defaults to false)
       bool get_tx_hex;      // (Optional) Return the transactions as hex string after sending. (Defaults to false)
       bool get_tx_metadata; // (Optional) Return list of transaction metadata needed to relay the transfer later. (Defaults to false)
 
@@ -778,7 +779,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Send all unlocked balance to an address.
   struct COMMAND_RPC_SWEEP_ALL
   {
@@ -788,9 +789,9 @@ namespace wallet_rpc
       uint32_t account_index;             // Sweep transactions from this account.
       std::set<uint32_t> subaddr_indices; // (Optional) Sweep from this set of subaddresses in the account.
       uint32_t priority;                  // (Optional) Priority for sending the sweep transfer, partially determines fee. 
-      uint64_t ring_size;                 // (Deprecated) Set to 10. Sets ringsize to n (mixin + 1). Loki ring_size is statically set to 10.
+      uint64_t ring_size;                 // (Deprecated) Set to 10. Sets ringsize to n (mixin + 1). Worktips ring_size is statically set to 10.
       uint64_t outputs;                   // 
-      uint64_t unlock_time;               // Number of blocks before the loki can be spent (0 to not add a lock). 
+      uint64_t unlock_time;               // Number of blocks before the worktips can be spent (0 to not add a lock). 
       std::string payment_id;             // (Optional) 64-character hex string to identify a transaction.
       bool get_tx_keys;                   // (Optional) Return the transaction keys after sending.
       uint64_t below_amount;              // (Optional) Include outputs below this amount.
@@ -850,7 +851,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Send all of a specific unlocked output to an address.
   struct COMMAND_RPC_SWEEP_SINGLE
   {
@@ -858,9 +859,9 @@ namespace wallet_rpc
     {
       std::string address;    // Destination public address.
       uint32_t priority;      // (Optional) Priority for sending the sweep transfer, partially determines fee.
-      uint64_t ring_size;     // (Deprecated) Set to 10. Sets ringsize to n (mixin + 1). Loki ring_size is statically set to 10.
+      uint64_t ring_size;     // (Deprecated) Set to 10. Sets ringsize to n (mixin + 1). Worktips ring_size is statically set to 10.
       uint64_t outputs;       // 
-      uint64_t unlock_time;   // Number of blocks before the loki can be spent (0 to not add a lock).
+      uint64_t unlock_time;   // Number of blocks before the worktips can be spent (0 to not add a lock).
       std::string payment_id; // (Optional) 64-character hex string to identify a transaction.
       bool get_tx_key;        // (Optional) Return the transaction keys after sending.
       std::string key_image;  // Key image of specific output to sweep.
@@ -909,7 +910,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Relay transaction metadata to the daemon 
   struct COMMAND_RPC_RELAY_TX
   {
@@ -934,7 +935,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Save the wallet file.
   struct COMMAND_RPC_STORE
   {
@@ -953,7 +954,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // 
   struct payment_details
   {
@@ -976,7 +977,7 @@ namespace wallet_rpc
     END_KV_SERIALIZE_MAP()
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Get a list of incoming payments using a given payment id.
   struct COMMAND_RPC_GET_PAYMENTS
   {
@@ -1001,7 +1002,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Get a list of incoming payments using a given payment id, 
   // or a list of payments ids, from a given height. 
   //
@@ -1033,13 +1034,13 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
   
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // 
   struct transfer_details
   {
     uint64_t amount;                            // Amount of this transfer.
     bool spent;                                 // Indicates if this transfer has been spent.
-    uint64_t global_index;                      // The index into the global list of transactions grouped by amount in the Loki network.
+    uint64_t global_index;                      // The index into the global list of transactions grouped by amount in the Worktips network.
     std::string tx_hash;                        // Several incoming transfers may share the same hash if they were in the same transaction.
     cryptonote::subaddress_index subaddr_index; // Major & minor index, account and subaddress index respectively.
     std::string key_image;                      // Key image for the incoming transfer's unspent output (empty unless verbose is true).
@@ -1060,7 +1061,7 @@ namespace wallet_rpc
     END_KV_SERIALIZE_MAP()
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Return a list of incoming transfers to the wallet.
   struct COMMAND_RPC_INCOMING_TRANSFERS
   {
@@ -1090,7 +1091,7 @@ namespace wallet_rpc
   };
 
   //JSON RPC V2
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Return the spend or view private key.
   struct COMMAND_RPC_QUERY_KEY
   {
@@ -1115,7 +1116,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Make an integrated address from the wallet address and a payment id.
   struct COMMAND_RPC_MAKE_INTEGRATED_ADDRESS
   {
@@ -1144,7 +1145,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Retrieve the standard address and payment id corresponding to an integrated address.
   struct COMMAND_RPC_SPLIT_INTEGRATED_ADDRESS
   {
@@ -1173,7 +1174,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Stops the wallet, storing the current state.
   struct COMMAND_RPC_STOP_WALLET
   {
@@ -1192,7 +1193,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Rescan the blockchain from scratch, losing any information 
   // which can not be recovered from the blockchain itself.
   // This includes destination addresses, tx secret keys, tx notes, etc.
@@ -1218,7 +1219,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Set arbitrary string notes for transactions.
   struct COMMAND_RPC_SET_TX_NOTES
   {
@@ -1242,7 +1243,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Get string notes for transactions.
   struct COMMAND_RPC_GET_TX_NOTES
   {
@@ -1267,7 +1268,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Set arbitrary attribute.
   struct COMMAND_RPC_SET_ATTRIBUTE
   {
@@ -1291,7 +1292,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Get attribute value by name.
   struct COMMAND_RPC_GET_ATTRIBUTE
   {
@@ -1317,7 +1318,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Get transaction secret key from transaction id.
   struct COMMAND_RPC_GET_TX_KEY
   {
@@ -1342,7 +1343,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Check a transaction in the blockchain with its secret key.
   struct COMMAND_RPC_CHECK_TX_KEY
   {
@@ -1375,7 +1376,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Get transaction signature to prove it.
   struct COMMAND_RPC_GET_TX_PROOF
   {
@@ -1404,7 +1405,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Prove a transaction by checking its signature.
   struct COMMAND_RPC_CHECK_TX_PROOF
   {
@@ -1441,7 +1442,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Generate a signature to prove a spend. Unlike proving a transaction, it does not requires the destination public address.
   struct COMMAND_RPC_GET_SPEND_PROOF
   {
@@ -1468,7 +1469,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Prove a spend using a signature. Unlike proving a transaction, it does not requires the destination public address.
   struct COMMAND_RPC_CHECK_SPEND_PROOF
   {
@@ -1497,7 +1498,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Generate a signature to prove of an available amount in a wallet.
   struct COMMAND_RPC_GET_RESERVE_PROOF
   {
@@ -1528,7 +1529,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Proves a wallet has a disposable reserve using a signature.
   struct COMMAND_RPC_CHECK_RESERVE_PROOF
   {
@@ -1561,7 +1562,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Returns a list of transfers.
   struct COMMAND_RPC_GET_TRANSFERS
   {
@@ -1615,7 +1616,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Returns a string with the transfers formatted as csv
   struct COMMAND_RPC_GET_TRANSFERS_CSV
   {
@@ -1632,7 +1633,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Show information about a transfer to/from this address.
   struct COMMAND_RPC_GET_TRANSFER_BY_TXID
   {
@@ -1661,7 +1662,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Sign a string.
   struct COMMAND_RPC_SIGN
   {
@@ -1686,7 +1687,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Verify a signature on a string.
   struct COMMAND_RPC_VERIFY
   {
@@ -1715,7 +1716,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Export all outputs in hex format.
   struct COMMAND_RPC_EXPORT_OUTPUTS
   {
@@ -1740,7 +1741,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Import outputs in hex format.
   struct COMMAND_RPC_IMPORT_OUTPUTS
   {
@@ -1765,7 +1766,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Export a signed set of key images.
   struct COMMAND_RPC_EXPORT_KEY_IMAGES
   {
@@ -1803,7 +1804,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Import signed key images list and verify their spent status.
   struct COMMAND_RPC_IMPORT_KEY_IMAGES
   {
@@ -1845,7 +1846,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   struct uri_spec
   {
     std::string address;        // Wallet address.
@@ -1863,7 +1864,7 @@ namespace wallet_rpc
     END_KV_SERIALIZE_MAP()
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Create a payment URI using the official URI spec.
   struct COMMAND_RPC_MAKE_URI
   {
@@ -1883,7 +1884,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Parse a payment URI to get payment information.
   struct COMMAND_RPC_PARSE_URI
   {
@@ -1910,7 +1911,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Add an entry to the address book.
   struct COMMAND_RPC_ADD_ADDRESS_BOOK_ENTRY
   {
@@ -1939,7 +1940,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Retrieves entries from the address book.
   struct COMMAND_RPC_GET_ADDRESS_BOOK_ENTRY
   {
@@ -1979,7 +1980,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Delete an entry from the address book.
   struct COMMAND_RPC_DELETE_ADDRESS_BOOK_ENTRY
   {
@@ -2001,7 +2002,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Rescan the blockchain for spent outputs.
   struct COMMAND_RPC_RESCAN_SPENT
   {
@@ -2020,7 +2021,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Refresh a wallet after openning.
   struct COMMAND_RPC_REFRESH
   {
@@ -2047,7 +2048,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   struct COMMAND_RPC_AUTO_REFRESH
   {
     struct request_t
@@ -2070,8 +2071,8 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
-  // Start mining in the loki daemon.
+  WORKTIPS_RPC_DOC_INTROSPECT
+  // Start mining in the worktips daemon.
   struct COMMAND_RPC_START_MINING
   {
     struct request_t
@@ -2096,8 +2097,8 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
-  // Stop mining in the loki daemon.
+  WORKTIPS_RPC_DOC_INTROSPECT
+  // Stop mining in the worktips daemon.
   struct COMMAND_RPC_STOP_MINING
   {
     struct request_t
@@ -2115,7 +2116,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Get a list of available languages for your wallet's seed.
   struct COMMAND_RPC_GET_LANGUAGES
   {
@@ -2139,8 +2140,8 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
-  // Create a new wallet. You need to have set the argument "'–wallet-dir" when launching loki-wallet-rpc to make this work.
+  WORKTIPS_RPC_DOC_INTROSPECT
+  // Create a new wallet. You need to have set the argument "'–wallet-dir" when launching worktips-wallet-rpc to make this work.
   struct COMMAND_RPC_CREATE_WALLET
   {
     struct request_t
@@ -2165,8 +2166,8 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
-  // Open a wallet. You need to have set the argument "–-wallet-dir" when launching loki-wallet-rpc to make this work.
+  WORKTIPS_RPC_DOC_INTROSPECT
+  // Open a wallet. You need to have set the argument "–-wallet-dir" when launching worktips-wallet-rpc to make this work.
   // The wallet rpc executable may only open wallet files within the same directory as wallet-dir, otherwise use the
   // "--wallet-file" flag to open specific wallets.
   struct COMMAND_RPC_OPEN_WALLET
@@ -2193,7 +2194,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Close the currently opened wallet, after trying to save it.
   struct COMMAND_RPC_CLOSE_WALLET
   {
@@ -2215,7 +2216,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Change a wallet password.
   struct COMMAND_RPC_CHANGE_WALLET_PASSWORD
   {
@@ -2239,7 +2240,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Restore a wallet using the private spend key, view key and public address.
   struct COMMAND_RPC_GENERATE_FROM_KEYS
   {
@@ -2278,7 +2279,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Restore a wallet using the seed words.
   struct COMMAND_RPC_RESTORE_DETERMINISTIC_WALLET
   {
@@ -2321,7 +2322,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
   
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Check if a wallet is a multisig one.
   struct COMMAND_RPC_IS_MULTISIG
   {
@@ -2349,7 +2350,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Prepare a wallet for multisig by generating a multisig string to share with peers.
   struct COMMAND_RPC_PREPARE_MULTISIG
   {
@@ -2371,7 +2372,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Make a wallet multisig by importing peers multisig string.
   struct COMMAND_RPC_MAKE_MULTISIG
   {
@@ -2402,7 +2403,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Export multisig info for other participants.
   struct COMMAND_RPC_EXPORT_MULTISIG
   {
@@ -2424,7 +2425,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Import multisig info from other participants.
   struct COMMAND_RPC_IMPORT_MULTISIG
   {
@@ -2449,7 +2450,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Turn this wallet into a multisig wallet, extra step for N-1/N wallets.
   struct COMMAND_RPC_FINALIZE_MULTISIG
   {
@@ -2476,7 +2477,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // 
   struct COMMAND_RPC_EXCHANGE_MULTISIG_KEYS
   {
@@ -2505,7 +2506,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Sign a transaction in multisig.
   struct COMMAND_RPC_SIGN_MULTISIG
   {
@@ -2532,7 +2533,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Submit a signed multisig transaction.
   struct COMMAND_RPC_SUBMIT_MULTISIG
   {
@@ -2557,7 +2558,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Get RPC version Major & Minor integer-format, where Major is the first 16 bits and Minor the last 16 bits.
   struct COMMAND_RPC_GET_VERSION
   {
@@ -2579,19 +2580,19 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Stake for Service Node.
   struct COMMAND_RPC_STAKE
   {
     struct request_t
     {
       std::string        destination;      // Primary Public address that the rewards will go to.
-      uint64_t           amount;           // Amount of Loki to stake in atomic units.
+      uint64_t           amount;           // Amount of Worktips to stake in atomic units.
       std::set<uint32_t> subaddr_indices;  // (Optional) Transfer from this set of subaddresses. (Defaults to 0)
       std::string        service_node_key; // Service Node Public Address.
       uint32_t           priority;         // Set a priority for the transaction. Accepted Values are: 0-3 for: default, unimportant, normal, elevated, priority.
       bool               get_tx_key;       // (Optional) Return the transaction key after sending.
-      bool               do_not_relay;     // (Optional) If true, the newly created transaction will not be relayed to the loki network. (Defaults to false)
+      bool               do_not_relay;     // (Optional) If true, the newly created transaction will not be relayed to the worktips network. (Defaults to false)
       bool               get_tx_hex;       // Return the transaction as hex string after sending (Defaults to false)
       bool               get_tx_metadata;  // Return the metadata needed to relay the transaction. (Defaults to false)
 
@@ -2634,7 +2635,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Register Service Node.
   struct COMMAND_RPC_REGISTER_SERVICE_NODE
   {
@@ -2642,7 +2643,7 @@ namespace wallet_rpc
     {
       std::string register_service_node_str; // String supplied by the prepare_registration command.
       bool        get_tx_key;                // (Optional) Return the transaction key after sending.
-      bool        do_not_relay;              // (Optional) If true, the newly created transaction will not be relayed to the loki network. (Defaults to false)
+      bool        do_not_relay;              // (Optional) If true, the newly created transaction will not be relayed to the worktips network. (Defaults to false)
       bool        get_tx_hex;                // Return the transaction as hex string after sending (Defaults to false)
       bool        get_tx_metadata;           // Return the metadata needed to relay the transaction. (Defaults to false)
 
@@ -2681,7 +2682,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Request to unlock stake by deregistering Service Node.
   struct COMMAND_RPC_REQUEST_STAKE_UNLOCK
   {
@@ -2708,7 +2709,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
   
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   // Check if Service Node can unlock it's stake.
   struct COMMAND_RPC_CAN_REQUEST_STAKE_UNLOCK
   {
@@ -2735,8 +2736,8 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
   
-  LOKI_RPC_DOC_INTROSPECT
-  // Parse an address to validate if it's a valid Loki address.
+  WORKTIPS_RPC_DOC_INTROSPECT
+  // Parse an address to validate if it's a valid Worktips address.
   struct COMMAND_RPC_VALIDATE_ADDRESS
   {
     struct request_t
@@ -2755,7 +2756,7 @@ namespace wallet_rpc
 
     struct response_t
     {
-      bool valid;                    // States if it is a valid Loki address.
+      bool valid;                    // States if it is a valid Worktips address.
       bool integrated;               // States if it is an integrated address.
       bool subaddress;               // States if it is a subaddress.
       std::string nettype;           // States if the nettype is mainet, testnet, stagenet.
@@ -2772,7 +2773,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   struct COMMAND_RPC_SET_DAEMON
   {
     struct request_t
@@ -2807,7 +2808,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   struct COMMAND_RPC_SET_LOG_LEVEL
   {
     struct request_t
@@ -2828,7 +2829,7 @@ namespace wallet_rpc
     typedef epee::misc_utils::struct_init<response_t> response;
   };
 
-  LOKI_RPC_DOC_INTROSPECT
+  WORKTIPS_RPC_DOC_INTROSPECT
   struct COMMAND_RPC_SET_LOG_CATEGORIES
   {
     struct request_t

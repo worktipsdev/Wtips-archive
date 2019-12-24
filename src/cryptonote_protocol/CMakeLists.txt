@@ -27,7 +27,7 @@
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 cmake_minimum_required (VERSION 2.6)
-project (loki CXX)
+project (worktips CXX)
 
 set(cryptonote_protocol_sources
   block_queue.cpp
@@ -46,9 +46,9 @@ set(cryptonote_protocol_private_headers
   quorumnet.h
 )
 
-loki_private_headers(cryptonote_protocol
+worktips_private_headers(cryptonote_protocol
   ${cryptonote_protocol_private_headers})
-loki_add_library(cryptonote_protocol
+worktips_add_library(cryptonote_protocol
   ${cryptonote_protocol_sources}
   ${cryptonote_protocol_headers}
   ${cryptonote_protocol_private_headers})

@@ -1,3 +1,4 @@
+# Copyright (c) 2018, The Worktips Project
 # Copyright (c) 2018, The Loki Project
 # Copyright (c) 2014-2019, The Monero Project
 #
@@ -28,7 +29,7 @@
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 cmake_minimum_required (VERSION 2.6)
-project (loki CXX)
+project (worktips CXX)
 
 set(p2p_sources
   net_node.cpp
@@ -46,9 +47,9 @@ set(p2p_private_headers
   stdafx.h
 )
 
-loki_private_headers(p2p
+worktips_private_headers(p2p
   ${p2p_private_headers})
-loki_add_library(p2p
+worktips_add_library(p2p
   ${p2p_sources}
   ${p2p_headers}
   ${p2p_private_headers})
