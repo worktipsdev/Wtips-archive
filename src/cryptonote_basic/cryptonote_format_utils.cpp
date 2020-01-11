@@ -1155,7 +1155,7 @@ namespace cryptonote
   {
     switch (decimal_point)
     {
-      case 9:
+      case 8:
       case 6:
       case 3:
       case 0:
@@ -1177,7 +1177,7 @@ namespace cryptonote
       decimal_point = default_decimal_point;
     switch (decimal_point)
     {
-      case 9:
+      case 8:
         return "worktips";
       case 6:
         return "megarok";

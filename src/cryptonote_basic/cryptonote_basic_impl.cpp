@@ -98,6 +98,20 @@ namespace cryptonote {
     uint64_t result = 28000000000.0 + 100000000000.0 / worktips::exp2(height / (720.0 * 90.0)); // halve every 90 days.
     return result;
   }
+  
+    uint64_t block_reward_unpenalized_formula_v9(uint64_t height)
+  {
+    std::fesetround(FE_TONEAREST);
+    uint64_t result = 28000000000.0 + 200000000000.0 / worktips::exp2(height / (720.0 * 90.0)); // halve every 90 days.
+    return result;
+  }
+  
+    uint64_t block_reward_unpenalized_formula_v13(uint64_t height)
+  {
+    std::fesetround(FE_TONEAREST);
+    uint64_t result = 28000000000.0 + 200000000000.0 / worktips::exp2(height / (2880 * 90.0)); // halve every 90 days.
+    return result;
+  }
 
   bool get_base_block_reward(size_t median_weight, size_t current_block_weight, uint64_t already_generated_coins, uint64_t &reward, uint64_t &reward_unpenalized, uint8_t version, uint64_t height) {
 
@@ -110,9 +124,17 @@ namespace cryptonote {
 
     static_assert(DIFFICULTY_TARGET_V2%60==0,"difficulty targets must be a multiple of 60");
 
-    uint64_t base_reward = version >= network_version_8
-                               ? block_reward_unpenalized_formula_v8(height)
-                               : block_reward_unpenalized_formula_v7(already_generated_coins, height);
+
+uint64_t base_reward = version == network_version_7
+							? block_reward_unpenalized_formula_v7(already_generated_coins, height)
+							: version == network_version_8
+							? block_reward_unpenalized_formula_v8(height)
+							: version >= network_version_9_service_nodes && version <= network_version_11_infinite_staking
+							? block_reward_unpenalized_formula_v9(height)
+							: version >= network_version_12_checkpointing
+							? block_reward_unpenalized_formula_v13(height)
+							: block_reward_unpenalized_formula_v13(height);
+							
     uint64_t full_reward_zone = get_min_block_weight(version);
 
     //make it soft
