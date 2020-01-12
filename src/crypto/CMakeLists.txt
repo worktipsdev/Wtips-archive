@@ -28,6 +28,9 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+include_directories(${CMAKE_SOURCE_DIR}/external/argon2/arch/x86_64/lib)
+include_directories(${CMAKE_SOURCE_DIR}/external/argon2/include)
+
 set(crypto_sources
   aesb.c
   blake256.c
@@ -54,7 +57,8 @@ set(crypto_sources
   rx-slow-hash.c
   tree-hash.c)
 
-include_directories(${RANDOMX_INCLUDE})
+include_directories(${ARGON2_INCLUDE})
+include_directories(${CMAKE_SOURCE_DIR}/external/argon2/include)
 
 set(crypto_headers)
 
@@ -88,7 +92,7 @@ worktips_add_library(cncrypto
 target_link_libraries(cncrypto
   PUBLIC
     epee
-    randomx
+    argon2
     ${Boost_SYSTEM_LIBRARY}
     ${SODIUM_LIBRARIES}
   PRIVATE

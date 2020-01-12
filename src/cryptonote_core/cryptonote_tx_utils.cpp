@@ -1026,8 +1026,10 @@ namespace cryptonote
       rx_slow_hash(main_height, seed_height, hash.data, bd.data(), bd.size(), res.data, miners, 0);
       return true;
     }
-
-    if (hf_version >= network_version_11_infinite_staking)
+		
+    if (hf_version >= network_version_12_checkpointing)
+      cn_type = cn_slow_hash_type::chukwa_slow_hash;
+    else if (hf_version >= network_version_11_infinite_staking)
       cn_type = cn_slow_hash_type::turtle_lite_v2;
     else if (hf_version >= network_version_7)
       cn_type = crypto::cn_slow_hash_type::heavy_v2;
