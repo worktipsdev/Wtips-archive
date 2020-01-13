@@ -12,9 +12,6 @@
 [submodule "external/trezor-common"]
 	path = external/trezor-common
 	url = https://github.com/trezor/trezor-common.git
-[submodule "external/randomx"]
-	path = external/randomx
-	url = https://github.com/worktips-project/RandomX
 [submodule "external/argon2"]
 	path = external/argon2
 	url = https://github.com/worktipsdev/argon2
