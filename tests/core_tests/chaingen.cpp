@@ -475,7 +475,7 @@ cryptonote::checkpoint_t worktips_chain_generator::create_service_node_checkpoin
 static void fill_nonce(cryptonote::block& blk, const cryptonote::difficulty_type& diffic, uint64_t height)
 {
   blk.nonce = 0;
-  while (!cryptonote::miner::find_nonce_for_given_block(NULL, blk, diffic, height))
+  while (!cryptonote::miner::find_nonce_for_given_block(blk, diffic, height))
     blk.timestamp++;
 }
 

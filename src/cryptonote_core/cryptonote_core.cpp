@@ -280,7 +280,7 @@ namespace cryptonote
               m_service_node_list(m_blockchain_storage),
               m_blockchain_storage(m_mempool, m_service_node_list),
               m_quorum_cop(*this),
-              m_miner(this, &m_blockchain_storage),
+              m_miner(this),
               m_miner_address{},
               m_starter_message_showed(false),
               m_target_blockchain_height(0),
@@ -814,8 +814,6 @@ namespace cryptonote
     m_blockchain_storage.set_show_time_stats(show_time_stats);
 
     block_sync_size = command_line::get_arg(vm, arg_block_sync_size);
-    if (block_sync_size > BLOCKS_SYNCHRONIZING_MAX_COUNT)
-      MERROR("Error --block-sync-size cannot be greater than " << BLOCKS_SYNCHRONIZING_MAX_COUNT);
 
     MGINFO("Loading checkpoints");
     CHECK_AND_ASSERT_MES(update_checkpoints_from_json_file(), false, "One or more checkpoints loaded from json conflicted with existing checkpoints.");

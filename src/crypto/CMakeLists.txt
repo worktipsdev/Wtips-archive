@@ -54,7 +54,6 @@ set(crypto_sources
   cn_heavy_hash_hard_intel.cpp
   cn_heavy_hash_soft.cpp
   cn_turtle_hash.c
-  rx-slow-hash.c
   tree-hash.c)
 
 include_directories(${ARGON2_INCLUDE})
