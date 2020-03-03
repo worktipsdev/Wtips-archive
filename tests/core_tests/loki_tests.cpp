@@ -2082,6 +2082,7 @@ bool loki_name_system_update_mapping::generate(std::vector<test_event_entry> &ev
     session_tx_hash1 = cryptonote::get_transaction_hash(tx1);
     gen.create_and_add_next_block({tx1});
   }
+  uint64_t register_height = gen.height();
 
   // Test update mapping with same name fails
   {
@@ -2095,7 +2096,6 @@ bool loki_name_system_update_mapping::generate(std::vector<test_event_entry> &ev
     session_tx_hash2 = cryptonote::get_transaction_hash(tx1);
     gen.create_and_add_next_block({tx1});
   }
-  uint64_t session_height2 = gen.height();
 
   loki_register_callback(events, "check_updated", [=](cryptonote::core &c, size_t ev_index)
   {
@@ -2106,7 +2106,7 @@ bool loki_name_system_update_mapping::generate(std::vector<test_event_entry> &ev
     std::vector<lns::mapping_record> records = lns_db.get_mappings({static_cast<uint16_t>(lns::mapping_type::session)}, name_hash);
 
     CHECK_EQ(records.size(), 1);
-    CHECK_TEST_CONDITION(verify_lns_mapping_record(perr_context, records[0], lns::mapping_type::session, session_name1, bob_key.session_value, session_height2, session_tx_hash2, session_tx_hash1 /*prev_txid*/, miner_key.key, {} /*backup_owner*/));
+    CHECK_TEST_CONDITION(verify_lns_mapping_record(perr_context, records[0], lns::mapping_type::session, session_name1, bob_key.session_value, register_height, session_tx_hash2, session_tx_hash1 /*prev_txid*/, miner_key.key, {} /*backup_owner*/));
     return true;
   });
 
@@ -2160,7 +2160,6 @@ bool loki_name_system_update_mapping_multiple_owners::generate(std::vector<test_
 
       cryptonote::transaction tx2 = gen.create_and_add_loki_name_system_tx_update(miner, lns::mapping_type::session, name, &temp_keys.session_value, nullptr /*owner*/, nullptr /*backup_owner*/, &signature);
       gen.create_and_add_next_block({tx2});
-      height    = gen.height();
       prev_txid = txid;
       txid      = cryptonote::get_transaction_hash(tx2);
 
@@ -2184,7 +2183,6 @@ bool loki_name_system_update_mapping_multiple_owners::generate(std::vector<test_
 
       cryptonote::transaction tx2 = gen.create_and_add_loki_name_system_tx_update(miner, lns::mapping_type::session, name, &temp_keys.session_value, nullptr /*owner*/, nullptr /*backup_owner*/, &signature);
       gen.create_and_add_next_block({tx2});
-      uint64_t height = gen.height();
       prev_txid = txid;
       txid      = cryptonote::get_transaction_hash(tx2);
 
@@ -2226,7 +2224,6 @@ bool loki_name_system_update_mapping_multiple_owners::generate(std::vector<test_
 
       cryptonote::transaction tx2 = gen.create_and_add_loki_name_system_tx_update(miner, lns::mapping_type::session, name, &temp_keys.session_value, nullptr /*owner*/, nullptr /*backup_owner*/, &signature);
       gen.create_and_add_next_block({tx2});
-      height    = gen.height();
       prev_txid = txid;
       txid      = cryptonote::get_transaction_hash(tx2);
 
@@ -2250,7 +2247,6 @@ bool loki_name_system_update_mapping_multiple_owners::generate(std::vector<test_
 
       cryptonote::transaction tx2 = gen.create_and_add_loki_name_system_tx_update(miner, lns::mapping_type::session, name, &temp_keys.session_value, nullptr /*owner*/, nullptr /*backup_owner*/, &signature);
       gen.create_and_add_next_block({tx2});
-      height    = gen.height();
       prev_txid = txid;
       txid      = cryptonote::get_transaction_hash(tx2);
 
@@ -2292,7 +2288,6 @@ bool loki_name_system_update_mapping_multiple_owners::generate(std::vector<test_
 
       cryptonote::transaction tx2 = gen.create_and_add_loki_name_system_tx_update(miner, lns::mapping_type::session, name, &temp_keys.session_value, nullptr /*owner*/, nullptr /*backup_owner*/, &signature);
       gen.create_and_add_next_block({tx2});
-      height    = gen.height();
       prev_txid = txid;
       txid      = cryptonote::get_transaction_hash(tx2);
 
@@ -2316,7 +2311,6 @@ bool loki_name_system_update_mapping_multiple_owners::generate(std::vector<test_
 
       cryptonote::transaction tx2 = gen.create_and_add_loki_name_system_tx_update(miner, lns::mapping_type::session, name, &temp_keys.session_value, nullptr /*owner*/, nullptr /*backup_owner*/, &signature);
       gen.create_and_add_next_block({tx2});
-      height    = gen.height();
       prev_txid = txid;
       txid      = cryptonote::get_transaction_hash(tx2);
 
@@ -2358,7 +2352,6 @@ bool loki_name_system_update_mapping_multiple_owners::generate(std::vector<test_
 
       cryptonote::transaction tx2 = gen.create_and_add_loki_name_system_tx_update(miner, lns::mapping_type::session, name, &temp_keys.session_value, nullptr /*owner*/, nullptr /*backup_owner*/, &signature);
       gen.create_and_add_next_block({tx2});
-      height    = gen.height();
       prev_txid = txid;
       txid      = cryptonote::get_transaction_hash(tx2);
 
@@ -2382,7 +2375,6 @@ bool loki_name_system_update_mapping_multiple_owners::generate(std::vector<test_
 
       cryptonote::transaction tx2 = gen.create_and_add_loki_name_system_tx_update(miner, lns::mapping_type::session, name, &temp_keys.session_value, nullptr /*owner*/, nullptr /*backup_owner*/, &signature);
       gen.create_and_add_next_block({tx2});
-      height    = gen.height();
       prev_txid = txid;
       txid      = cryptonote::get_transaction_hash(tx2);
 
