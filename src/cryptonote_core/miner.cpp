@@ -595,7 +595,6 @@ namespace cryptonote
       ++m_hashes;
       ++m_total_hashes;
     }
-    rx_slow_hash_free_state();
     MGINFO("Miner thread stopped ["<< th_local_index << "]");
     --m_threads_active;
 #if defined(WORKTIPS_ENABLE_INTEGRATION_TEST_HOOKS)
