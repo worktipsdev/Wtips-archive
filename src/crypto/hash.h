@@ -30,8 +30,6 @@
 
 #pragma once
 
-#include "argon2.h"
-
 #include <stddef.h>
 #include <iostream>
 
@@ -39,6 +37,7 @@
 #include "hex.h"
 #include "span.h"
 #include "crypto/cn_heavy_hash.hpp"
+#include "argon2.h"
 
 namespace crypto {
 

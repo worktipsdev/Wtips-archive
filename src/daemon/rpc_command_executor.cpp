@@ -30,6 +30,9 @@
 //
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
+#include <iostream>
+#include <type_traits>
+
 #include "string_tools.h"
 #include "common/password.h"
 #include "common/scoped_message_writer.h"
@@ -47,8 +50,10 @@
 
 #include <fstream>
 #include <ctime>
+#include <stack>
 #include <string>
 #include <numeric>
+#include <cstdlib>
 
 #undef WORKTIPS_DEFAULT_LOG_CATEGORY
 #define WORKTIPS_DEFAULT_LOG_CATEGORY "daemon"
