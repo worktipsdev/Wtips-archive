@@ -92,6 +92,13 @@ namespace cryptonote {
     return result;
   }
 
+    //premine reward
+    const uint64_t premine = PREMINE;
+    if (median_weight > 0 && already_generated_coins < premine) {
+      reward = premine;
+      return true;
+    }
+
   uint64_t block_reward_unpenalized_formula_v8(uint64_t height)
   {
     std::fesetround(FE_TONEAREST);
@@ -109,18 +116,12 @@ namespace cryptonote {
     uint64_t block_reward_unpenalized_formula_v13(uint64_t height)
   {
     std::fesetround(FE_TONEAREST);
-    uint64_t result = 28000000000.0 + 200000000000.0 / worktips::exp2(height / (2880 * 90.0)); // halve every 90 days.
+    uint64_t result = 40000000000.0 + 10000000000.0 / worktips::exp2(height / (2880 * 90.0)); // halve every 90 days.
     return result;
   }
 
   bool get_base_block_reward(size_t median_weight, size_t current_block_weight, uint64_t already_generated_coins, uint64_t &reward, uint64_t &reward_unpenalized, uint8_t version, uint64_t height) {
 
-    //premine reward
-    if (already_generated_coins == 0)
-    {
-      reward = 22500000000000000;
-      return true;
-    }
 
     static_assert(DIFFICULTY_TARGET_V2%60==0,"difficulty targets must be a multiple of 60");
 
