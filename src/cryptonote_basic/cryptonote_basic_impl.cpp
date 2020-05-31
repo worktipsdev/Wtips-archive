@@ -92,12 +92,6 @@ namespace cryptonote {
     return result;
   }
 
-    //premine reward
-    const uint64_t premine = PREMINE;
-    if (median_weight > 0 && already_generated_coins < premine) {
-      reward = premine;
-      return true;
-    }
 
   uint64_t block_reward_unpenalized_formula_v8(uint64_t height)
   {
@@ -121,6 +115,13 @@ namespace cryptonote {
   }
 
   bool get_base_block_reward(size_t median_weight, size_t current_block_weight, uint64_t already_generated_coins, uint64_t &reward, uint64_t &reward_unpenalized, uint8_t version, uint64_t height) {
+
+    //premine reward
+    const uint64_t premine = PREMINE;
+    if (median_weight > 0 && already_generated_coins < premine) {
+      reward = premine;
+      return true;
+    }
 
 
     static_assert(DIFFICULTY_TARGET_V2%60==0,"difficulty targets must be a multiple of 60");

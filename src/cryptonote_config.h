@@ -285,7 +285,7 @@ namespace cryptonote
     network_version_9_service_nodes, // Proof Of Stake w/ Service Nodes
     network_version_10_bulletproofs, // Bulletproofs, Service Node Grace Registration Period, Batched Governance
     network_version_11_infinite_staking, // Infinite Staking, CN-Turtle
-    network_version_12_checkpointing, // Checkpointing, Relaxed Deregistration, RandomXL, Worktips Storage Server
+    network_version_12_checkpointing, // Checkpointing, Relaxed Deregistration, Chukwa
     network_version_13_enforce_checkpoints,
     network_version_14_blink_lns,
 
