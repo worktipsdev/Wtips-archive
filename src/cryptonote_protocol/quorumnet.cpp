@@ -741,10 +741,7 @@ void process_blink_signatures(SNNWrapper &snw, const std::shared_ptr<blink_tx> &
     if (became_approved) {
         MINFO("Accumulated enough signatures for blink tx: enabling tx relay");
         auto &pool = snw.core.get_pool();
-        {
-            auto lock = pool.blink_unique_lock();
-            pool.add_existing_blink(btxptr);
-        }
+        pool.add_existing_blink(btxptr);
         pool.set_relayable({{btx.get_txhash()}});
         snw.core.relay_txpool_transactions();
     }

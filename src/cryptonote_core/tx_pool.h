@@ -157,8 +157,6 @@ namespace cryptonote
     /**
      * @brief attempts to add a blink transaction to the transaction pool.
      *
-     * This method must be called without a held blink lock.
-     *
      * This is only for use for new transactions that should not exist yet on the chain or mempool
      * (and will fail if already does).  See `add_existing_blink` instead to add blink data about a
      * transaction that already exists.  This is only meant to be called during the SN blink signing
@@ -186,8 +184,6 @@ namespace cryptonote
     /**
      * @brief attempts to add blink transaction information about an existing blink transaction
      *
-     * You *must* already hold a blink_unique_lock().
-     *
      * This method takes an approved blink_tx and records it in the known blinks data.  No check is
      * done that the transaction actually exists on the blockchain or mempool.  It is assumed that
      * the given shared_ptr is a new blink that is not yet shared between threads (and thus doesn't
@@ -197,33 +193,32 @@ namespace cryptonote
      * *not* check it (except as an assert when compiling in debug mode).
      *
      * @param blink the blink_tx shared_ptr
+     * @param have_lock can be specified as true to avoid taking out a unique lock on the blinks
+     * data structure; it should only be specified if a unique lock on the blink data is already
+     * held externally, i.e. by obtaining a lock with `blink_unique_lock`.
      *
      * @return true if the blink data was recorded, false if the given blink was already known.
      */
-    bool add_existing_blink(std::shared_ptr<blink_tx> blink);
+    bool add_existing_blink(std::shared_ptr<blink_tx> blink, bool have_lock = false);
 
     /**
      * @brief accesses blink tx details if the given tx hash is a known, approved blink tx, nullptr
      * otherwise.
      *
-     * You *must* already hold a blink_shared_lock() or blink_unique_lock().
-     *
      * @param tx_hash the hash of the tx to access
+     * @param have_lock can be specified as true to avoid taking out a shared lock; it should only
+     * be specified if a shared lock on the blink data is already held externally.
      */
-    std::shared_ptr<blink_tx> get_blink(const crypto::hash &tx_hash) const;
+    std::shared_ptr<blink_tx> get_blink(const crypto::hash &tx_hash, bool have_lock = false) const;
 
     /**
      * Equivalent to `(bool) get_blink(...)`, but slightly more efficient when the blink information
      * isn't actually needed beyond an existance test (as it avoids copying the shared_ptr).
-     *
-     * You *must* already hold a blink_shared_lock() or blink_unique_lock().
      */
-    bool has_blink(const crypto::hash &tx_hash) const;
+    bool has_blink(const crypto::hash &tx_hash, bool have_lock = false) const;
 
     /**
      * @brief modifies a vector of tx hashes to remove any that have known valid blink signatures
-     *
-     * Must not currently hold a blink lock.
      *
      * @param txs the tx hashes to check
      */
@@ -231,8 +226,6 @@ namespace cryptonote
 
     /**
      * @brief returns checksums of blink txes included in recently mined blocks and in the mempool
-     *
-     * Must not currently hold a blink lock.
      *
      * The returned map consists of height => hashsum pairs where the height is the height in which
      * the blink transactions were mined and the hashsum is a checksum of all the blink txes mined
@@ -245,8 +238,6 @@ namespace cryptonote
     /**
      * @brief returns the hashes of any non-immutable blink transactions mined in the given heights.
      * A height of 0 is allowed: it indicates blinks in the mempool.
-     *
-     * Must not currently hold a blink lock.
      *
      * Note that this returned hashes by MINED HEIGHTS, not BLINK HEIGHTS where are a different
      * concept.
@@ -703,8 +694,6 @@ namespace cryptonote
      * rollback is needed for the blink tx.  (That is, all blocks with height >=
      * blink_rollback_height need to be popped).
      *
-     * This method is *not* called with a blink lock held.
-     *
      * @return true if the conflicting transactions have been removed (and/or the rollback height
      * set), false if tx removal and/or rollback are insufficient to eliminate conflicting txes.
      */
@@ -770,7 +759,7 @@ namespace cryptonote
 
     // Helper method: retrieves hashes and mined heights of blink txes since the immutable block;
     // mempool blinks are included with a height of 0.  Also takes care of cleaning up any blinks
-    // that have become immutable.  Blink lock must not be already held.
+    // that have become immutable.
     std::pair<std::vector<crypto::hash>, std::vector<uint64_t>> get_blink_hashes_and_mined_heights() const;
   };
 }
