@@ -1,4 +1,4 @@
-// Copyright (c) 2019-2020, The Loki Project
+// Copyright (c) 2019, The Loki Project
 //
 // All rights reserved.
 //
@@ -28,9 +28,11 @@
 
 #pragma once
 
-// This file (plus .cpp) contains the glue layer between cryptonote_core and loki-mq.
+// This file (plus .cpp) contains the glue layer between cryptonote_core and quorumnet.
 
 #include <vector>
+//#include "quorumnet/service_node.h"
+//
 
 namespace service_nodes {
     struct quorum_vote_t;

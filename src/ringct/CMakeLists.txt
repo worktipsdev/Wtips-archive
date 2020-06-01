@@ -27,30 +27,54 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_library(ringct_basic
+set(ringct_basic_sources
   rctOps.cpp
   rctTypes.cpp
   rctCryptoOps.c
   multiexp.cc
   bulletproofs.cc)
 
+set(ringct_basic_private_headers
+  rctOps.h
+  rctTypes.h
+  multiexp.h
+  bulletproofs.h)
+
+loki_private_headers(ringct_basic
+  ${crypto_private_headers})
+loki_add_library(ringct_basic
+  ${ringct_basic_sources}
+  ${ringct_basic_private_headers})
 target_link_libraries(ringct_basic
   PUBLIC
     common
+    cncrypto
   PRIVATE
-    OpenSSL::SSL
-    OpenSSL::Crypto
-    extra)
+    ${OPENSSL_LIBRARIES}
+    ${EXTRA_LIBRARIES})
 
-add_library(ringct
+set(ringct_sources
   rctSigs.cpp
-  )
+)
+
+set(ringct_headers)
+
+set(ringct_private_headers
+  rctSigs.h
+)
+
+loki_private_headers(ringct
+  ${crypto_private_headers})
+loki_add_library(ringct
+  ${ringct_sources}
+  ${ringct_headers}
+  ${ringct_private_headers})
 target_link_libraries(ringct
   PUBLIC
     common
+    cncrypto
     cryptonote_basic
     device
   PRIVATE
-    OpenSSL::SSL
-    OpenSSL::Crypto
-    extra)
+    ${OPENSSL_LIBRARIES}
+    ${EXTRA_LIBRARIES})

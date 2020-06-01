@@ -45,7 +45,6 @@ using namespace epee;
 #include "common/util.h"
 #include "common/perf_timer.h"
 #include "common/random.h"
-#include "common/base32z.h"
 #include "cryptonote_basic/cryptonote_format_utils.h"
 #include "cryptonote_basic/account.h"
 #include "cryptonote_basic/cryptonote_basic_impl.h"
@@ -75,17 +74,6 @@ namespace
     return (value + quantum - 1) / quantum * quantum;
   }
 }
-
-namespace std
-{
-template <>
-struct hash<lns::generic_owner>
-{
-  static_assert(sizeof(lns::generic_owner) >= sizeof(std::size_t) && alignof(lns::generic_owner) >= alignof(std::size_t),
-                "Size and alignment of hash must be at least that of size_t");
-  std::size_t operator()(const lns::generic_owner &v) const { return reinterpret_cast<const std::size_t &>(v); }
-};
-} // namespace std
 
 namespace cryptonote
 {
@@ -2113,59 +2101,12 @@ namespace cryptonote
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
-  bool core_rpc_server::on_get_service_node_status(const COMMAND_RPC_GET_SERVICE_NODE_STATUS::request& req, COMMAND_RPC_GET_SERVICE_NODE_STATUS::response& res, epee::json_rpc::error& error_resp, const connection_context *ctx)
-  {
-    PERF_TIMER(on_get_service_node_status);
-    cryptonote::COMMAND_RPC_GET_SERVICE_NODE_KEY::response get_service_node_key_res = {};
-    cryptonote::COMMAND_RPC_GET_SERVICE_NODE_KEY::request get_service_node_key_req = {};
-
-    if (!on_get_service_node_key(get_service_node_key_req, get_service_node_key_res, error_resp, ctx))
-    {
-      return false;
-    }
-
-    cryptonote::COMMAND_RPC_GET_SERVICE_NODES::request get_service_nodes_req;
-    cryptonote::COMMAND_RPC_GET_SERVICE_NODES::response get_service_nodes_res;
-
-    get_service_nodes_req.include_json = req.include_json;
-    get_service_nodes_req.service_node_pubkeys.push_back(get_service_node_key_res.service_node_pubkey);
-
-    if (!on_get_service_nodes(get_service_nodes_req, get_service_nodes_res, error_resp, ctx))
-    {
-      return false;
-    }
-
-    if (get_service_nodes_res.service_node_states.empty()) // Started in service node but not staked, no information on the blockchain yet
-    {
-      res.service_node_state.service_node_pubkey  = std::move(get_service_node_key_res.service_node_pubkey);
-      res.service_node_state.version_major        = LOKI_VERSION[0];
-      res.service_node_state.version_minor        = LOKI_VERSION[1];
-      res.service_node_state.version_patch        = LOKI_VERSION[2];
-      res.service_node_state.public_ip            = epee::string_tools::get_ip_string_from_int32(m_core.sn_public_ip());
-      res.service_node_state.storage_port         = m_core.storage_port();
-      res.service_node_state.storage_lmq_port     = m_core.m_storage_lmq_port;
-      res.service_node_state.quorumnet_port       = m_core.quorumnet_port();
-      res.service_node_state.pubkey_ed25519       = std::move(get_service_node_key_res.service_node_ed25519_pubkey);
-      res.service_node_state.pubkey_x25519        = std::move(get_service_node_key_res.service_node_x25519_pubkey);
-      res.service_node_state.service_node_version = LOKI_VERSION;
-    }
-    else
-    {
-      res.service_node_state = std::move(get_service_nodes_res.service_node_states[0]);
-    }
-
-    res.height = get_service_nodes_res.height;
-    res.block_hash = get_service_nodes_res.block_hash;
-    res.status = get_service_nodes_res.status;
-    res.as_json = get_service_nodes_res.as_json;
-
-    return true;
-  }
-  //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_coinbase_tx_sum(const COMMAND_RPC_GET_COINBASE_TX_SUM::request& req, COMMAND_RPC_GET_COINBASE_TX_SUM::response& res, epee::json_rpc::error& error_resp, const connection_context *ctx)
   {
     PERF_TIMER(on_get_coinbase_tx_sum);
-    std::tie(res.emission_amount, res.fee_amount, res.burn_amount) = m_core.get_coinbase_tx_sum(req.height, req.count);
+    std::pair<uint64_t, uint64_t> amounts = m_core.get_coinbase_tx_sum(req.height, req.count);
+    res.emission_amount = amounts.first;
+    res.fee_amount = amounts.second;
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
@@ -2832,7 +2773,6 @@ namespace cryptonote
       auto &new_entry = res.blacklist.back();
       new_entry.key_image     = epee::string_tools::pod_to_hex(entry.key_image);
       new_entry.unlock_height = entry.unlock_height;
-      new_entry.amount = entry.amount;
     }
     return true;
   }
@@ -2893,7 +2833,6 @@ namespace cryptonote
         entry.service_node_version     = proof.version;
         entry.public_ip                = string_tools::get_ip_string_from_int32(proof.public_ip);
         entry.storage_port             = proof.storage_port;
-        entry.storage_lmq_port         = proof.storage_lmq_port;
         entry.storage_server_reachable = proof.storage_server_reachable;
         entry.pubkey_ed25519           = proof.pubkey_ed25519 ? string_tools::pod_to_hex(proof.pubkey_ed25519) : "";
         entry.pubkey_x25519            = proof.pubkey_x25519 ? string_tools::pod_to_hex(proof.pubkey_x25519) : "";
@@ -3179,12 +3118,7 @@ namespace cryptonote
   {
     if (handle_ping({req.version_major, req.version_minor, req.version_patch}, service_nodes::MIN_STORAGE_SERVER_VERSION,
           "Storage Server", m_core.m_last_storage_server_ping, STORAGE_SERVER_PING_LIFETIME, res))
-    {
       m_core.reset_proof_interval();
-
-      m_core.m_storage_lmq_port = req.storage_lmq_port;
-    }
-
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
@@ -3202,36 +3136,9 @@ namespace cryptonote
   bool core_rpc_server::on_get_staking_requirement(const COMMAND_RPC_GET_STAKING_REQUIREMENT::request& req, COMMAND_RPC_GET_STAKING_REQUIREMENT::response& res, epee::json_rpc::error& error_resp, const connection_context *ctx)
   {
     PERF_TIMER(on_get_staking_requirement);
-    res.height = req.height > 0 ? req.height : m_core.get_current_blockchain_height();
-
-    res.staking_requirement = service_nodes::get_staking_requirement(m_core.get_nettype(), res.height, m_core.get_hard_fork_version(res.height));
+    res.staking_requirement = service_nodes::get_staking_requirement(m_core.get_nettype(), req.height, m_core.get_hard_fork_version(req.height));
     res.status = CORE_RPC_STATUS_OK;
     return true;
-  }
-  //------------------------------------------------------------------------------------------------------------------------------
-  static bool exceeds_quantity_limit(const core_rpc_server::connection_context *ctx, epee::json_rpc::error &error_resp, bool restricted, size_t count, size_t max, char const *container_name = nullptr)
-  {
-    if (ctx && restricted)
-    {
-      if (count > max)
-      {
-        error_resp.code     = CORE_RPC_ERROR_CODE_WRONG_PARAM;
-        error_resp.message  = "Number of requested entries ";
-        if (container_name)
-        {
-          error_resp.message += "in ";
-          error_resp.message += container_name;
-          error_resp.message += " ";
-        }
-
-        error_resp.message += "greater than the allowed limit: ";
-        error_resp.message += std::to_string(max);
-        error_resp.message += ", requested: ";
-        error_resp.message += std::to_string(count);
-        return true;
-      }
-    }
-    return false;
   }
   //------------------------------------------------------------------------------------------------------------------------------
   bool core_rpc_server::on_get_checkpoints(const COMMAND_RPC_GET_CHECKPOINTS::request& req, COMMAND_RPC_GET_CHECKPOINTS::response& res, epee::json_rpc::error& error_resp, const connection_context *ctx)
@@ -3240,8 +3147,18 @@ namespace cryptonote
     if (use_bootstrap_daemon_if_necessary<COMMAND_RPC_GET_CHECKPOINTS>(invoke_http_mode::JON_RPC, "get_checkpoints", req, res, bootstrap_daemon_connection_failure))
       return bootstrap_daemon_connection_failure;
 
-    if (exceeds_quantity_limit(ctx, error_resp, m_restricted, req.count, COMMAND_RPC_GET_CHECKPOINTS_MAX_COUNT))
-      return false;
+    if (ctx && m_restricted)
+    {
+      if (req.count > COMMAND_RPC_GET_CHECKPOINTS_MAX_COUNT)
+      {
+        error_resp.code     = CORE_RPC_ERROR_CODE_WRONG_PARAM;
+        error_resp.message  = "Number of requested checkpoints greater than the allowed limit: ";
+        error_resp.message += std::to_string(COMMAND_RPC_GET_CHECKPOINTS_MAX_COUNT);
+        error_resp.message += ", requested: ";
+        error_resp.message += std::to_string(req.count);
+        return false;
+      }
+    }
 
     res.status             = CORE_RPC_STATUS_OK;
     BlockchainDB const &db = m_core.get_blockchain_storage().get_db();
@@ -3407,96 +3324,5 @@ namespace cryptonote
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
-  //------------------------------------------------------------------------------------------------------------------------------
-  bool core_rpc_server::on_lns_names_to_owners(const COMMAND_RPC_LNS_NAMES_TO_OWNERS::request &req, COMMAND_RPC_LNS_NAMES_TO_OWNERS::response &res, epee::json_rpc::error &error_resp, const connection_context *ctx)
-  {
-    if (exceeds_quantity_limit(ctx, error_resp, m_restricted, req.entries.size(), COMMAND_RPC_LNS_NAMES_TO_OWNERS::MAX_REQUEST_ENTRIES))
-      return false;
 
-    lns::name_system_db &db = m_core.get_blockchain_storage().name_system_db();
-    for (size_t request_index = 0; request_index < req.entries.size(); request_index++)
-    {
-      COMMAND_RPC_LNS_NAMES_TO_OWNERS::request_entry const &request = req.entries[request_index];
-      if (exceeds_quantity_limit(ctx, error_resp, m_restricted, request.types.size(), COMMAND_RPC_LNS_NAMES_TO_OWNERS::MAX_TYPE_REQUEST_ENTRIES, "types"))
-        return false;
-
-      std::vector<lns::mapping_record> records = db.get_mappings(request.types, request.name_hash);
-      for (auto const &record : records)
-      {
-        res.entries.emplace_back();
-        COMMAND_RPC_LNS_NAMES_TO_OWNERS::response_entry &entry = res.entries.back();
-        entry.entry_index                                      = request_index;
-        entry.type                                             = static_cast<uint16_t>(record.type);
-        entry.name_hash                                        = record.name_hash;
-        entry.owner                                            = record.owner.to_string(nettype());
-        if (record.backup_owner) entry.backup_owner            = record.backup_owner.to_string(nettype());
-        entry.encrypted_value                                  = epee::to_hex::string(record.encrypted_value.to_span());
-        entry.register_height                                  = record.register_height;
-        entry.update_height                                    = record.update_height;
-        entry.txid                                             = epee::string_tools::pod_to_hex(record.txid);
-        if (record.prev_txid) entry.prev_txid                  = epee::string_tools::pod_to_hex(record.prev_txid);
-      }
-    }
-
-    res.status = CORE_RPC_STATUS_OK;
-    return true;
-  }
-  //------------------------------------------------------------------------------------------------------------------------------
-  bool core_rpc_server::on_lns_owners_to_names(const COMMAND_RPC_LNS_OWNERS_TO_NAMES::request &req, COMMAND_RPC_LNS_OWNERS_TO_NAMES::response &res, epee::json_rpc::error &error_resp, const connection_context *ctx)
-  {
-    if (exceeds_quantity_limit(ctx, error_resp, m_restricted, req.entries.size(), COMMAND_RPC_LNS_OWNERS_TO_NAMES::MAX_REQUEST_ENTRIES))
-      return false;
-
-    std::unordered_map<lns::generic_owner, size_t> owner_to_request_index;
-    std::vector<lns::generic_owner> owners;
-
-    owners.reserve(req.entries.size());
-    for (size_t request_index = 0; request_index < req.entries.size(); request_index++)
-    {
-      std::string const &owner     = req.entries[request_index];
-      lns::generic_owner lns_owner = {};
-      if (!lns::parse_owner_to_generic_owner(m_core.get_nettype(), owner, lns_owner, &error_resp.message))
-      {
-        error_resp.code = CORE_RPC_ERROR_CODE_WRONG_PARAM;
-        return false;
-      }
-
-      // TODO(loki): We now serialize both owner and backup_owner, since if
-      // we specify an owner that is backup owner, we don't show the (other)
-      // owner. For RPC compatibility we keep the request_index around until the
-      // next hard fork (16)
-      owners.push_back(lns_owner);
-      owner_to_request_index[lns_owner] = request_index;
-    }
-
-    lns::name_system_db &db = m_core.get_blockchain_storage().name_system_db();
-    std::vector<lns::mapping_record> records = db.get_mappings_by_owners(owners);
-    for (auto &record : records)
-    {
-      res.entries.emplace_back();
-      COMMAND_RPC_LNS_OWNERS_TO_NAMES::response_entry &entry = res.entries.back();
-
-      auto it = owner_to_request_index.find(record.owner);
-      if (it == owner_to_request_index.end())
-      {
-        error_resp.code    = CORE_RPC_ERROR_CODE_INTERNAL_ERROR;
-        error_resp.message = "Owner=" + record.owner.to_string(nettype()) + ", could not be mapped back a index in the request 'entries' array";
-        return false;
-      }
-
-      entry.request_index   = it->second;
-      entry.type            = static_cast<uint16_t>(record.type);
-      entry.name_hash       = std::move(record.name_hash);
-      if (record.owner) entry.owner = record.owner.to_string(nettype());
-      if (record.backup_owner) entry.backup_owner = record.backup_owner.to_string(nettype());
-      entry.encrypted_value = epee::to_hex::string(record.encrypted_value.to_span());
-      entry.register_height = record.register_height;
-      entry.update_height   = record.update_height;
-      entry.txid            = epee::string_tools::pod_to_hex(record.txid);
-      if (record.prev_txid) entry.prev_txid = epee::string_tools::pod_to_hex(record.prev_txid);
-    }
-
-    res.status = CORE_RPC_STATUS_OK;
-    return true;
-  }
 }  // namespace cryptonote

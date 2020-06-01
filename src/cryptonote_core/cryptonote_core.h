@@ -85,8 +85,6 @@ namespace cryptonote
   extern void *(*quorumnet_new)(core &core, const std::string &bind);
   // Stops the quorumnet listener; is expected to delete the object and reset the pointer to nullptr.
   extern void (*quorumnet_delete)(void *&self);
-  // Called when a block is added to let LokiMQ update the active set of SNs
-  extern void (*quorumnet_refresh_sns)(void* self);
   // Relays votes via quorumnet.
   extern void (*quorumnet_relay_obligation_votes)(void *self, const std::vector<service_nodes::quorum_vote_t> &votes);
   // Sends a blink tx to the current blink quorum, returns a future that can be used to wait for the
@@ -320,10 +318,6 @@ namespace cryptonote
       * @return whether or not the block is too big
       */
      bool check_incoming_block_size(const blobdata& block_blob) const;
-
-     /// Called (from service_node_quorum_cop) to tell quorumnet that it need to refresh its list of
-     /// active SNs.
-     void update_lmq_sns();
 
      /**
       * @brief get the cryptonote protocol instance
@@ -792,7 +786,7 @@ namespace cryptonote
       *
       * @return the number of blocks to sync in one go
       */
-     std::tuple<uint64_t, uint64_t, uint64_t> get_coinbase_tx_sum(const uint64_t start_offset, const size_t count);
+     std::pair<uint64_t, uint64_t> get_coinbase_tx_sum(const uint64_t start_offset, const size_t count);
 
      /**
       * @brief get the network type we're on
@@ -961,11 +955,6 @@ namespace cryptonote
 
      /// Time point at which the storage server and lokinet last pinged us
      std::atomic<time_t> m_last_storage_server_ping, m_last_lokinet_ping;
-     std::atomic<uint16_t> m_storage_lmq_port;
-
-     uint32_t sn_public_ip() const { return m_sn_public_ip; }
-     uint16_t storage_port() const { return m_storage_port; }
-     uint16_t quorumnet_port() const { return m_quorumnet_port; }
 
      /**
       * @brief attempts to relay any transactions in the mempool which need it
@@ -1145,7 +1134,7 @@ namespace cryptonote
 
      std::unique_ptr<service_node_keys> m_service_node_keys;
 
-     /// Service Node's public IP and storage server port (http and lokimq)
+     /// Service Node's public IP and storage server port
      uint32_t m_sn_public_ip;
      uint16_t m_storage_port;
      uint16_t m_quorumnet_port;

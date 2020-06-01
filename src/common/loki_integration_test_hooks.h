@@ -1,7 +1,7 @@
 #if defined(LOKI_ENABLE_INTEGRATION_TEST_HOOKS)
 
 #if defined _WIN32
-#error "Not implemented"
+#error "Need to implement semaphores for Windows Layer"
 #endif
 
 #ifndef LOKI_INTEGRATION_TEST_HOOKS_H
@@ -10,214 +10,278 @@
 //
 // Header
 //
-#include <mutex>
-#include <vector>
+#include <stdint.h>
+#include <sstream>
+#include <iostream>
+#include <boost/thread/mutex.hpp>
+#include "syncobj.h"
+
 #include "command_line.h"
+#include "shoom.h"
 
-namespace integration_test
+namespace loki
 {
-void                     init                 (std::string const &base_name);
-void                     deinit               ();
-std::string              read_from_pipe       ();
-void                     write_buffered_stdout();
-void                     use_standard_cout    ();
-void                     use_redirected_cout  ();
-std::vector<std::string> space_delimit_input  (std::string const &input);
-
-extern const command_line::arg_descriptor<std::string, false> arg_hardforks_override;
-extern const command_line::arg_descriptor<std::string, false> arg_pipe_name;
-
-extern struct state_t
+struct fixed_buffer
 {
-  std::mutex mutex;
+  static const int SIZE = 65536;
+  char data[SIZE];
+  int  len;
+};
+
+void                     init_integration_test_context        (std::string const &base_name);
+void                     deinit_integration_test_context      ();
+fixed_buffer             read_from_stdin_shared_mem           ();
+void                     write_redirected_stdout_to_shared_mem();
+void                     use_standard_cout                    ();
+void                     use_redirected_cout                  ();
+std::vector<std::string> separate_stdin_to_space_delim_args   (fixed_buffer const *cmd);
+
+extern const command_line::arg_descriptor<std::string, false> arg_integration_test_hardforks_override;
+extern const command_line::arg_descriptor<std::string, false> arg_integration_test_shared_mem_name;
+extern boost::mutex integration_test_mutex;
+
+extern struct integration_test_t
+{
   bool core_is_idle;
   bool disable_checkpoint_quorum;
   bool disable_obligation_quorum;
   bool disable_obligation_uptime_proof;
   bool disable_obligation_checkpointing;
-} state;
+} integration_test;
 
-}; // integration_test
+}; // namespace loki
 
 #endif // LOKI_INTEGRATION_TEST_HOOKS_H
 
-// -------------------------------------------------------------------------------------------------
 //
 // CPP Implementation
 //
-// -------------------------------------------------------------------------------------------------
 #ifdef LOKI_INTEGRATION_TEST_HOOKS_IMPLEMENTATION
 #include <string.h>
 #include <assert.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <iostream>
+#include <chrono>
+#include <thread>
 
-namespace integration_test
+#define SHOOM_IMPLEMENTATION
+#include "shoom.h"
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <semaphore.h>
+
+static std::ostringstream  global_redirected_cout;
+static std::streambuf     *global_std_cout;
+static shoom::Shm         *global_stdin_shared_mem;
+static shoom::Shm         *global_stdout_shared_mem;
+static sem_t              *global_stdin_semaphore_handle;
+static sem_t              *global_stdout_semaphore_handle;
+static sem_t              *global_stdout_ready_semaphore;
+static sem_t              *global_stdin_ready_semaphore;
+
+namespace loki
 {
-const command_line::arg_descriptor<std::string, false> arg_hardforks_override = {
+
+integration_test_t integration_test;
+
+const command_line::arg_descriptor<std::string, false> arg_integration_test_hardforks_override = {
   "integration-test-hardforks-override"
 , "Specify custom hardfork heights and launch in regtest mode"
 , ""
 , false
 };
 
-const command_line::arg_descriptor<std::string, false> arg_pipe_name = {
-  "integration-test-pipe-name"
-, "Specify the pipe name for stdin and stdout"
-, "loki-default-pipe-name"
+const command_line::arg_descriptor<std::string, false> arg_integration_test_shared_mem_name = {
+  "integration-test-shared-mem-name"
+, "Specify the shared memory base name for stdin, stdout and semaphore name"
+, "loki-default-integration-test-mem-name"
 , false
 };
 
-state_t state;
-}; // namespace integration_test
+boost::mutex integration_test_mutex;
 
-struct ipc_pipe
-{
-  int         fd;
-  std::string file;
-};
-ipc_pipe read_pipe;
-ipc_pipe write_pipe;
+} // namespace loki
 
-uint32_t const MSG_PACKET_MAGIC = 0x27befd93;
-struct msg_packet
-{
-  uint32_t magic = MSG_PACKET_MAGIC;
-  char buf[1024];
-  int  len;
-  bool has_more;
-};
+std::string global_stdin_semaphore_name;
+std::string global_stdout_semaphore_name;
+std::string global_stdout_ready_semaphore_name;
+std::string global_stdin_ready_semaphore_name;
 
-static std::ostringstream  global_redirected_cout;
-static std::streambuf     *global_std_cout;
-void integration_test::use_standard_cout()   { if (!global_std_cout) { global_std_cout = std::cout.rdbuf(); } std::cout.rdbuf(global_std_cout); }
-void integration_test::use_redirected_cout() { if (!global_std_cout) { global_std_cout = std::cout.rdbuf(); } std::cout.rdbuf(global_redirected_cout.rdbuf()); }
-void integration_test::init(const std::string &base_name)
+void loki::use_standard_cout()   { if (!global_std_cout) { global_std_cout = std::cout.rdbuf(); } std::cout.rdbuf(global_std_cout); }
+void loki::use_redirected_cout() { if (!global_std_cout) { global_std_cout = std::cout.rdbuf(); } std::cout.rdbuf(global_redirected_cout.rdbuf()); }
+
+void loki::init_integration_test_context(const std::string &base_name)
 {
-  read_pipe.file  = base_name + "_stdin";
-  write_pipe.file = base_name + "_stdout";
-  read_pipe.fd    = open(read_pipe.file.c_str(), O_RDONLY);
-  if (read_pipe.fd == -1)
+  assert(base_name.size() > 0);
+
+  static bool init = false;
+  if (init)
+    return;
+
+  const std::string stdin_name            = base_name + "_stdin";
+  const std::string stdout_name           = base_name + "_stdout";
+
+  global_stdin_semaphore_name  = "/" + base_name + "_stdin_semaphore";
+  global_stdout_semaphore_name = "/" + base_name + "_stdout_semaphore";
+  global_stdout_ready_semaphore_name = "/" + base_name + "_stdout_ready_semaphore";
+  global_stdin_ready_semaphore_name = "/" + base_name + "_stdin_ready_semaphore";
+
+  static shoom::Shm stdin_shared_mem (stdin_name, fixed_buffer::SIZE);
+  static shoom::Shm stdout_shared_mem(stdout_name, fixed_buffer::SIZE);
+
+  init = true;
+  global_stdin_shared_mem = &stdin_shared_mem;
+  global_stdout_shared_mem = &stdout_shared_mem;
+  global_std_cout = std::cout.rdbuf();
+
+  global_stdout_shared_mem->Create(shoom::Flag::create);
+  while (global_stdin_shared_mem->Open() != 0)
   {
-    perror("Failed to open read pipe");
-    assert(false);
+    static bool once_only = true;
+    if (once_only)
+    {
+      once_only = false;
+      printf("Loki Integration Test: Shared memory %s has not been created yet, blocking ...\n", global_stdin_shared_mem->Path().c_str());
+    }
   }
-  else
-  {
-    fprintf(stdout, "---------- Opened read pipe: %.*s\n", (int)read_pipe.file.size(), read_pipe.file.c_str());
-    fprintf(stdout, "---------- Opened write pipe: %.*s\n", (int)write_pipe.file.size(), write_pipe.file.c_str());
-  }
+
+  global_stdin_semaphore_handle = sem_open(global_stdin_semaphore_name.c_str(), O_CREAT, 0600, 0);
+  global_stdout_semaphore_handle = sem_open(global_stdout_semaphore_name.c_str(), O_CREAT, 0600, 0);
+  global_stdout_ready_semaphore = sem_open(global_stdout_ready_semaphore_name.c_str(), O_CREAT, 0600, 0);
+  global_stdin_ready_semaphore = sem_open(global_stdin_ready_semaphore_name.c_str(), O_CREAT, 0600, 0);
+
+  if (!global_stdin_semaphore_handle)  fprintf(stderr, "Loki Integration Test: Failed to initialise global_stdin_semaphore_handle\n");
+  if (!global_stdout_semaphore_handle) fprintf(stderr, "Loki Integration Test: Failed to initialise global_stdout_semaphore_handle\n");
+  if (!global_stdout_ready_semaphore) fprintf(stderr, "Loki Integration Test: Failed to initialise global_stdout_ready_semaphore_handle\n");
+  if (!global_stdin_ready_semaphore) fprintf(stderr, "Loki Integration Test: Failed to initialise global_stdin_ready_semaphore_handle\n");
+
+  printf("Loki Integration Test: Hooks initialised into shared memory, %s, %s, %s, %s, %s, %s\n",
+      stdin_name.c_str(),
+      stdout_name.c_str(),
+      global_stdin_semaphore_name.c_str(),
+      global_stdout_semaphore_name.c_str(),
+      global_stdin_ready_semaphore_name.c_str(),
+      global_stdout_ready_semaphore_name.c_str());
 }
 
-void integration_test::deinit()
+void loki::deinit_integration_test_context()
 {
-  close(read_pipe.fd);
-  close(write_pipe.fd);
+  sem_unlink(global_stdin_semaphore_name.c_str());
+  sem_unlink(global_stdout_semaphore_name.c_str());
+  sem_unlink(global_stdout_ready_semaphore_name.c_str());
+  sem_unlink(global_stdin_ready_semaphore_name.c_str());
 }
 
-std::vector<std::string> integration_test::space_delimit_input(std::string const &input)
+uint32_t const MSG_MAGIC_BYTES = 0x7428da3f;
+void write_to_stdout_shared_mem(char const *buf, int buf_len)
+{
+  assert(global_stdout_shared_mem);
+  assert(buf_len < loki::fixed_buffer::SIZE);
+
+  int sem_value = 0;
+  sem_getvalue(global_stdout_ready_semaphore, &sem_value);
+
+  sem_wait(global_stdout_ready_semaphore);
+  {
+    char *msg_buf         = reinterpret_cast<char *>(global_stdout_shared_mem->Data());
+    int const msg_buf_len = global_stdout_shared_mem->Size();
+
+    char *ptr     = msg_buf;
+    int total_len = static_cast<int>(sizeof(MSG_MAGIC_BYTES) + buf_len);
+    if (total_len >= msg_buf_len)
+    {
+      int remain_len = msg_buf_len - sizeof(MSG_MAGIC_BYTES);
+      ptr = msg_buf + (buf_len - remain_len);
+    }
+
+    memcpy(ptr, (char *)&MSG_MAGIC_BYTES, sizeof(MSG_MAGIC_BYTES));
+    ptr += sizeof(MSG_MAGIC_BYTES);
+
+    memcpy(ptr, buf, buf_len);
+    msg_buf[total_len] = 0;
+  }
+  sem_post(global_stdout_semaphore_handle);
+}
+
+void write_to_stdout_shared_mem(std::string const &input) { write_to_stdout_shared_mem(input.c_str(), input.size()); }
+
+static char *parse_message(char *msg_buf, int msg_buf_len)
+{
+  char *ptr      = msg_buf;
+  uint32_t magic = *(uint32_t *)ptr;
+  if (magic != MSG_MAGIC_BYTES) return nullptr;
+  ptr += sizeof(MSG_MAGIC_BYTES);
+
+  assert(ptr < msg_buf + msg_buf_len);
+  return ptr;
+}
+
+std::vector<std::string> loki::separate_stdin_to_space_delim_args(loki::fixed_buffer const *cmd)
 {
   std::vector<std::string> args;
-  std::string::const_iterator start = input.begin();
-  for (auto it = input.begin(); it != input.end(); it++)
+  char const *start = cmd->data;
+  for (char const *buf_ptr = start; *buf_ptr; ++buf_ptr)
   {
-    if (*it == ' ')
+    if (buf_ptr[0] == ' ')
     {
-      std::string result(start, it);
-      start = (it + 1);
+      std::string result(start, buf_ptr - start);
+      start = buf_ptr + 1;
       args.push_back(result);
     }
   }
 
-  if (start != input.end())
+  if (*start)
   {
-    std::string last(start, input.end());
+    std::string last(start);
     args.push_back(last);
   }
 
   return args;
 }
 
-std::string integration_test::read_from_pipe()
+loki::fixed_buffer loki::read_from_stdin_shared_mem()
 {
-  std::unique_lock<std::mutex> scoped_lock(integration_test::state.mutex);
-  std::string result;
+  boost::unique_lock<boost::mutex> scoped_lock(integration_test_mutex);
 
-  for (;;)
+  assert(global_stdin_shared_mem);
+
+  char *input = nullptr;
+  int input_len = 0;
+  for(;;)
   {
-    msg_packet packet = {};
-    int bytes_read    = read(read_pipe.fd, reinterpret_cast<void *>(&packet), sizeof(packet));
-    if (bytes_read == -1)
+    int sem_value = 0;
+    sem_getvalue(global_stdin_semaphore_handle, &sem_value);
+    sem_wait(global_stdin_semaphore_handle);
+
+    global_stdin_shared_mem->Open();
+    input = parse_message(reinterpret_cast<char *>(global_stdin_shared_mem->Data()), global_stdin_shared_mem->Size());
+    if (input)
     {
-      perror("Error returned from read(...)");
-      return result;
+      input_len = strlen(input);
+      if (input_len > 0) break;
     }
 
-    if (bytes_read < static_cast<int>(sizeof(packet)))
-    {
-      fprintf(stderr, "Error reading packet from pipe expected=%zu, read=%d, possible that the pipe was cut mid-transmission\n", sizeof(packet), bytes_read);
-      return result;
-    }
-
-    if (packet.magic != MSG_PACKET_MAGIC)
-    {
-      fprintf(stderr, "Packet magic value=%x, does not match expected=%x\n", packet.magic, MSG_PACKET_MAGIC);
-      exit(-1);
-    }
-
-    fprintf(stdout, "---------- Read packet, len=%d msg=\"%.*s\"\n", packet.len, packet.len, packet.buf);
-    result.append(packet.buf, packet.len);
-    if (!packet.has_more) break;
+    sem_post(global_stdin_ready_semaphore);
   }
+
+  fixed_buffer result = {};
+  result.len = input_len;
+  assert(result.len <= fixed_buffer::SIZE);
+  memcpy(result.data, input, result.len);
+  result.data[result.len] = 0;
+  sem_post(global_stdin_ready_semaphore);
   return result;
 }
 
-static char const *make_msg_packet(char const *src, int *len, msg_packet *dest)
+void loki::write_redirected_stdout_to_shared_mem()
 {
-  *dest                   = {};
-  int const max_size      = static_cast<int>(sizeof(dest->buf));
-  int const bytes_to_copy = (*len > max_size) ? max_size : *len;
-
-  memcpy(dest->buf, src, bytes_to_copy);
-  dest->len = bytes_to_copy;
-  *len -= bytes_to_copy;
-
-  char const *result = (*len == 0) ? nullptr : src + bytes_to_copy;
-  dest->has_more     = result != nullptr;
-  return result;
-}
-
-void integration_test::write_buffered_stdout()
-{
-  std::unique_lock<std::mutex> scoped_lock(integration_test::state.mutex);
+  boost::unique_lock<boost::mutex> scoped_lock(integration_test_mutex);
 
   global_redirected_cout.flush();
   std::string output = global_redirected_cout.str();
   global_redirected_cout.str("");
-
   global_redirected_cout.clear();
-  if (write_pipe.fd == 0)
-  {
-    write_pipe.fd = open(write_pipe.file.c_str(), O_WRONLY);
-    if (write_pipe.fd == -1)
-    {
-      perror("Failed to open write pipe");
-      assert(false);
-    }
-  }
 
-  char const *src = output.c_str();
-  int src_len     = static_cast<int>(output.size());
-  while (src_len > 0)
-  {
-    msg_packet packet = {};
-    src               = make_msg_packet(src, &src_len, &packet);
-
-    int num_bytes_written = write(write_pipe.fd, static_cast<void *>(&packet), sizeof(packet));
-    if (num_bytes_written == -1)
-      perror("Error returned from write(...)");
-  }
+  write_to_stdout_shared_mem(output);
 
   use_standard_cout();
   std::cout << output << std::endl;

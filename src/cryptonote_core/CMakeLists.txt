@@ -27,7 +27,13 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_library(cryptonote_core
+pkg_check_modules(SYSTEMD libsystemd)
+
+if(SYSTEMD_FOUND)
+  add_definitions(-DENABLE_SYSTEMD)
+endif()
+
+set(cryptonote_core_sources
   blockchain.cpp
   cryptonote_core.cpp
   service_node_rules.cpp
@@ -36,39 +42,48 @@ add_library(cryptonote_core
   service_node_quorum_cop.cpp
   service_node_swarm.cpp
   tx_blink.cpp
-  loki_name_system.cpp
   tx_pool.cpp
   tx_sanity_check.cpp
   miner.cpp
   cryptonote_tx_utils.cpp)
 
+set(cryptonote_core_headers)
+
+set(cryptonote_core_private_headers
+  blockchain.h
+  service_node_rules.h
+  service_node_list.h
+  service_node_quorum_cop.h
+  service_node_swarm.h
+  cryptonote_core.h
+  service_node_voting.h
+  tx_blink.h
+  tx_pool.h
+  tx_sanity_check.h
+  miner.h
+  cryptonote_tx_utils.h)
+
+loki_private_headers(cryptonote_core
+  ${cryptonote_core_private_headers})
+loki_add_library(cryptonote_core
+  ${cryptonote_core_sources}
+  ${cryptonote_core_headers}
+  ${cryptonote_core_private_headers})
 target_link_libraries(cryptonote_core
   PUBLIC
     version
     common
+    cncrypto
     blockchain_db
     multisig
     ringct
     device
-    checkpoints
-    sqlite3
+    ${Boost_DATE_TIME_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_SERIALIZATION_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
   PRIVATE
-    Boost::program_options
-    Boost::chrono
-    extra)
-
-option(WITH_SYSTEMD "Attempts to link against and enable systemd daemon notification support" ON)
-if (WITH_SYSTEMD)
-    pkg_check_modules(SYSTEMD libsystemd)
-
-    if(SYSTEMD_FOUND)
-      target_compile_definitions(cryptonote_core PRIVATE ENABLE_SYSTEMD)
-      target_link_libraries(cryptonote_core PRIVATE ${SYSTEMD_LIBRARIES})
-    endif()
-endif()
-
-if(PER_BLOCK_CHECKPOINT)
-  target_compile_definitions(cryptonote_core PUBLIC PER_BLOCK_CHECKPOINT)
-  target_link_libraries(cryptonote_core PUBLIC blocks)
-endif()
-
+    ${SYSTEMD_LIBRARIES}
+    ${EXTRA_LIBRARIES})

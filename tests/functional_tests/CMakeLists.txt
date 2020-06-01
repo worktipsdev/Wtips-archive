@@ -26,19 +26,29 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_executable(functional_tests
+set(functional_tests_sources
   main.cpp
   transactions_flow_test.cpp
   transactions_generation_from_blockchain.cpp)
+
+set(functional_tests_headers
+  transactions_flow_test.h
+  transactions_generation_from_blockchain.h)
+
+add_executable(functional_tests
+  ${functional_tests_sources}
+  ${functional_tests_headers})
 target_link_libraries(functional_tests
   PRIVATE
     cryptonote_core
     wallet
     common
+    cncrypto
     epee
-    Boost::regex
-    Boost::program_options
-    extra)
+    ${Boost_REGEX_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 
 execute_process(COMMAND ${PYTHON_EXECUTABLE} "-c" "import requests; print('OK')" OUTPUT_VARIABLE REQUESTS_OUTPUT OUTPUT_STRIP_TRAILING_WHITESPACE)
 if (REQUESTS_OUTPUT STREQUAL "OK")

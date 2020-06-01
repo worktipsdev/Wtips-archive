@@ -26,7 +26,7 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_executable(unit_tests
+set(unit_tests_sources
   account.cpp
   apply_permutation.cpp
   address_from_url.cpp
@@ -55,7 +55,6 @@ add_executable(unit_tests
   http.cpp
   keccak.cpp
   logging.cpp
-  loki_name_system.cpp
   long_term_block_weight.cpp
   lmdb.cpp
   main.cpp
@@ -94,6 +93,12 @@ add_executable(unit_tests
   is_hdd.cpp
   aligned.cpp)
 
+set(unit_tests_headers
+  unit_tests_utils.h)
+
+add_executable(unit_tests
+  ${unit_tests_sources}
+  ${unit_tests_headers})
 target_link_libraries(unit_tests
   PRIVATE
     ringct
@@ -107,11 +112,11 @@ target_link_libraries(unit_tests
     wallet
     p2p
     version
-    Boost::chrono
-    Boost::thread
-    miniupnpc
+    ${Boost_CHRONO_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
     ${GTEST_LIBRARIES}
-    extra)
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET unit_tests
   PROPERTY
     FOLDER "tests")
@@ -132,5 +137,5 @@ add_test(
   COMMAND unit_tests --data-dir "${TEST_DATA_DIR}")
 
 add_executable(test_notifier test_notifier.cpp)
-target_link_libraries(test_notifier extra)
+target_link_libraries(test_notifier ${EXTRA_LIBRARIES})
 set_property(TARGET test_notifier PROPERTY FOLDER "tests")

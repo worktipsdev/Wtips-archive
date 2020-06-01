@@ -123,7 +123,7 @@ class RPCDaemon:
 
 
 class Daemon(RPCDaemon):
-    base_args = ('--dev-allow-local-ips', '--fixed-difficulty=1', '--regtest', '--non-interactive', '--rpc-ssl=disabled', '--rpc-long-poll-connections=0')
+    base_args = ('--dev-allow-local-ips', '--fixed-difficulty=1', '--regtest', '--non-interactive', '--rpc-ssl=disabled')
 
     def __init__(self, *,
             lokid='lokid',
@@ -313,15 +313,17 @@ class Wallet(RPCDaemon):
         return (b['balance'], b['unlocked_balance'])
 
 
-    def transfer(self, to, amount=None, *, priority=None, sweep=False):
+    def transfer(self, to, amount=None, *, priority=None, blink=False, sweep=False):
         """Attempts a transfer.  Throws TransferFailed if it gets rejected by the daemon, otherwise
         returns the 'result' key."""
-        if priority is None:
-            priority = 1
+        if blink and priority:
+            raise RuntimeError("Wallet.transfer: priority and blink are mutually exclusive")
+        elif priority is None:
+            priority = 0
         if sweep and not amount:
-            r = self.json_rpc("sweep_all", {"address": to.address(), "priority": priority})
+            r = self.json_rpc("sweep_all", {"address": to.address(), "priority": priority, "blink": blink})
         elif amount and not sweep:
-            r = self.json_rpc("transfer_split", {"destinations": [{"address": to.address(), "amount": amount}], "priority": priority})
+            r = self.json_rpc("transfer_split", {"destinations": [{"address": to.address(), "amount": amount}], "priority": priority, "blink": blink})
         else:
             raise RuntimeError("Wallet.transfer: either `sweep` or `amount` must be given")
 

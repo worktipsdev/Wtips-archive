@@ -33,7 +33,8 @@ target_link_libraries(block_fuzz_tests
     p2p
     epee
     device
-    extra)
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET block_fuzz_tests
   PROPERTY
     FOLDER "tests")
@@ -45,7 +46,8 @@ target_link_libraries(transaction_fuzz_tests
     p2p
     epee
     device
-    extra)
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET transaction_fuzz_tests
   PROPERTY
     FOLDER "tests")
@@ -58,7 +60,8 @@ target_link_libraries(signature_fuzz_tests
     p2p
     epee
     device
-    extra)
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET signature_fuzz_tests
   PROPERTY
     FOLDER "tests")
@@ -71,7 +74,8 @@ target_link_libraries(cold-outputs_fuzz_tests
     p2p
     epee
     device
-    extra)
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET cold-outputs_fuzz_tests
   PROPERTY
     FOLDER "tests")
@@ -84,7 +88,8 @@ target_link_libraries(cold-transaction_fuzz_tests
     p2p
     epee
     device
-    extra)
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET cold-transaction_fuzz_tests
   PROPERTY
     FOLDER "tests")
@@ -94,8 +99,9 @@ target_link_libraries(load-from-binary_fuzz_tests
   PRIVATE
     common
     epee
-    Boost::program_options
-    extra)
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET load-from-binary_fuzz_tests
   PROPERTY
     FOLDER "tests")
@@ -105,8 +111,9 @@ target_link_libraries(load-from-json_fuzz_tests
   PRIVATE
     common
     epee
-    Boost::program_options
-    extra)
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET load-from-json_fuzz_tests
   PROPERTY
     FOLDER "tests")
@@ -116,8 +123,9 @@ target_link_libraries(base58_fuzz_tests
   PRIVATE
     common
     epee
-    Boost::program_options
-    extra)
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET base58_fuzz_tests
   PROPERTY
     FOLDER "tests")
@@ -126,10 +134,11 @@ add_executable(parse-url_fuzz_tests parse_url.cpp fuzzer.cpp)
 target_link_libraries(parse-url_fuzz_tests
   PRIVATE
     epee
-    Boost::regex
-    Boost::program_options
-    Boost::system
-    extra)
+    ${Boost_REGEX_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET parse-url_fuzz_tests
   PROPERTY
     FOLDER "tests")
@@ -138,12 +147,13 @@ add_executable(http-client_fuzz_tests http-client.cpp fuzzer.cpp)
 target_link_libraries(http-client_fuzz_tests
   PRIVATE
     epee
-    Boost::thread
-    Boost::chrono
-    Boost::regex
-    Boost::program_options
-    Boost::system
-    extra)
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_CHRONO_LIBRARY}
+    ${Boost_REGEX_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET http-client_fuzz_tests
   PROPERTY
     FOLDER "tests")
@@ -153,11 +163,12 @@ target_link_libraries(levin_fuzz_tests
   PRIVATE
     common
     epee
-    Boost::thread
-    Boost::chrono
-    Boost::regex
-    Boost::program_options
-    extra)
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_CHRONO_LIBRARY}
+    ${Boost_REGEX_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET levin_fuzz_tests
   PROPERTY
     FOLDER "tests")
@@ -167,11 +178,12 @@ target_link_libraries(bulletproof_fuzz_tests
   PRIVATE
     common
     epee
-    Boost::thread
-    Boost::chrono
-    Boost::regex
-    Boost::program_options
-    extra)
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_CHRONO_LIBRARY}
+    ${Boost_REGEX_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 set_property(TARGET bulletproof_fuzz_tests
   PROPERTY
     FOLDER "tests")

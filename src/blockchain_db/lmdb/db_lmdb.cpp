@@ -4638,6 +4638,11 @@ void BlockchainLMDB::fixup(fixup_context const context)
     if (start_height >= height())
      return;
 
+    block_wtxn_start();
+
+    mdb_txn_cursors *m_cursors = &m_wcursors; // Necessary for macro
+    CURSOR(block_info);
+
     // The first blocks of v12 get an overridden difficulty, so if the start block is v12 we need to
     // make sure it isn't in that initial window; if it *is*, check H-60 to see if that is v11; if
     // it is, recalculate from there instead (so that we detect the v12 barrier).
@@ -4676,75 +4681,54 @@ void BlockchainLMDB::fixup(fixup_context const context)
 
     try
     {
-      uint64_t const num_blocks                = height() - start_height;
-      uint64_t prev_cumulative_diff            = get_block_cumulative_difficulty(start_height - 1);
-      uint64_t const BLOCKS_PER_BATCH          = 10000;
-      uint64_t const blocks_in_left_over_batch = num_blocks % BLOCKS_PER_BATCH;
-      uint64_t const num_batches               = (num_blocks + (BLOCKS_PER_BATCH - 1)) / BLOCKS_PER_BATCH;
-      size_t const left_over_batch_index       = num_batches - 1;
-      for (size_t batch_index = 0; batch_index < num_batches; batch_index++)
+      uint64_t num_blocks = height() - start_height;
+      uint64_t prev_cumulative_diff = get_block_cumulative_difficulty(start_height - 1);
+
+      for (size_t i = 0; i < num_blocks; i++)
       {
-        block_wtxn_start();
-        mdb_txn_cursors *m_cursors = &m_wcursors; // Necessary for macro
-        CURSOR(block_info);
-
-        uint64_t blocks_in_batch = (batch_index == left_over_batch_index ? blocks_in_left_over_batch : BLOCKS_PER_BATCH);
-        for (uint64_t block_index = 0; block_index < blocks_in_batch; block_index++)
-        {
-          uint64_t const curr_height = (start_height + (batch_index * BLOCKS_PER_BATCH) + block_index);
-          uint8_t version            = get_hard_fork_version(curr_height);
-          bool v12_initial_override = false;
-          if (version == cryptonote::network_version_12_checkpointing && v12_initial_blocks_remaining > 0) {
-            v12_initial_override = true;
-            v12_initial_blocks_remaining--;
-          }
-          difficulty_type diff = next_difficulty_v2(timestamps, difficulties, DIFFICULTY_TARGET_V2,
-              version <= cryptonote::network_version_9_service_nodes, v12_initial_override);
-
-          MDB_val_set(key, curr_height);
-
-          try
-          {
-            if (int result = mdb_cursor_get(m_cur_block_info, (MDB_val *)&zerokval, &key, MDB_GET_BOTH))
-              throw1(BLOCK_DNE(lmdb_error("Failed to get block info in recalculate difficulty: ", result).c_str()));
-
-            mdb_block_info block_info    = *(mdb_block_info *)key.mv_data;
-            uint64_t old_cumulative_diff = block_info.bi_diff;
-            block_info.bi_diff           = prev_cumulative_diff + diff;
-            prev_cumulative_diff         = block_info.bi_diff;
-
-            if (old_cumulative_diff != block_info.bi_diff)
-              LOG_PRINT_L0("Height: " << curr_height << " prev difficulty: " << old_cumulative_diff <<  ", new difficulty: " << block_info.bi_diff);
-            else
-              LOG_PRINT_L2("Height: " << curr_height << " difficulty unchanged (" << old_cumulative_diff << ")");
-
-            MDB_val_set(val, block_info);
-            if (int result = mdb_cursor_put(m_cur_block_info, (MDB_val *)&zerokval, &val, MDB_CURRENT))
-                throw1(BLOCK_DNE(lmdb_error("Failed to put block info: ", result).c_str()));
-
-            timestamps.push_back(block_info.bi_timestamp);
-            difficulties.push_back(block_info.bi_diff);
-          }
-          catch (DB_ERROR const &e)
-          {
-            block_wtxn_abort();
-            LOG_PRINT_L0("Something went wrong recalculating difficulty for block " << curr_height << e.what());
-            return;
-          }
-
-          while (timestamps.size() > DIFFICULTY_BLOCKS_COUNT_V2) timestamps.erase(timestamps.begin());
-          while (difficulties.size() > DIFFICULTY_BLOCKS_COUNT_V2) difficulties.erase(difficulties.begin());
+        uint64_t const curr_height = (start_height + i);
+        uint8_t version            = get_hard_fork_version(curr_height);
+        bool v12_initial_override = false;
+        if (version == cryptonote::network_version_12_checkpointing && v12_initial_blocks_remaining > 0) {
+          v12_initial_override = true;
+          v12_initial_blocks_remaining--;
         }
+        difficulty_type diff = next_difficulty_v2(timestamps, difficulties, DIFFICULTY_TARGET_V2,
+            version <= cryptonote::network_version_9_service_nodes, v12_initial_override);
 
-        block_wtxn_stop();
+        MDB_val_set(key, curr_height);
+        if (int result = mdb_cursor_get(m_cur_block_info, (MDB_val *)&zerokval, &key, MDB_GET_BOTH))
+            throw1(BLOCK_DNE(lmdb_error("Failed to get block info in recalculate difficulty: ", result).c_str()));
+
+        mdb_block_info block_info    = *(mdb_block_info *)key.mv_data;
+        uint64_t old_cumulative_diff = block_info.bi_diff;
+        block_info.bi_diff           = prev_cumulative_diff + diff;
+        prev_cumulative_diff         = block_info.bi_diff;
+
+        if (old_cumulative_diff != block_info.bi_diff)
+          LOG_PRINT_L0("Height: " << curr_height << " prev difficulty: " << old_cumulative_diff <<  ", new difficulty: " << block_info.bi_diff);
+        else
+          LOG_PRINT_L2("Height: " << curr_height << " difficulty unchanged (" << old_cumulative_diff << ")");
+
+        MDB_val_set(val, block_info);
+        if (int result = mdb_cursor_put(m_cur_block_info, (MDB_val *)&zerokval, &val, MDB_CURRENT))
+            throw1(BLOCK_DNE(lmdb_error("Failed to put block info: ", result).c_str()));
+
+        timestamps.push_back(block_info.bi_timestamp);
+        difficulties.push_back(block_info.bi_diff);
+
+        while (timestamps.size() > DIFFICULTY_BLOCKS_COUNT_V2) timestamps.erase(timestamps.begin());
+        while (difficulties.size() > DIFFICULTY_BLOCKS_COUNT_V2) difficulties.erase(difficulties.begin());
       }
-
     }
     catch (DB_ERROR const &e)
     {
-      LOG_PRINT_L0("Something went wrong in the pre-amble of recalculating difficulty for block: " << e.what());
+      LOG_PRINT_L0("Something went wrong calculating difficulty for block: " << e.what());
+      block_wtxn_abort();
       return;
     }
+
+    block_wtxn_stop();
   }
 }
 
@@ -6178,7 +6162,6 @@ struct service_node_proof_serialized
     : timestamp{native_to_little(info.timestamp)},
       ip{native_to_little(info.public_ip)},
       storage_port{native_to_little(info.storage_port)},
-      storage_lmq_port{native_to_little(info.storage_lmq_port)},
       quorumnet_port{native_to_little(info.quorumnet_port)},
       version{native_to_little(info.version[0]), native_to_little(info.version[1]), native_to_little(info.version[2])},
       pubkey_ed25519{info.pubkey_ed25519}
@@ -6190,7 +6173,6 @@ struct service_node_proof_serialized
       info.effective_timestamp = info.timestamp;
     info.public_ip = little_to_native(ip);
     info.storage_port = little_to_native(storage_port);
-    info.storage_lmq_port = little_to_native(storage_lmq_port);
     info.quorumnet_port = little_to_native(quorumnet_port);
     for (size_t i = 0; i < info.version.size(); i++)
       info.version[i] = little_to_native(version[i]);
@@ -6208,7 +6190,7 @@ struct service_node_proof_serialized
   uint16_t storage_port;
   uint16_t quorumnet_port;
   uint16_t version[3];
-  uint16_t storage_lmq_port;
+  uint16_t _padding{0};
   crypto::ed25519_public_key pubkey_ed25519;
 };
 static_assert(sizeof(service_node_proof_serialized) == 56, "service node serialization struct has unexpected size and/or padding");

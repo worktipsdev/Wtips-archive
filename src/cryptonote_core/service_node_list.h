@@ -74,10 +74,9 @@ namespace service_nodes
     proof_info() { votes.fill({}); }
 
     // Unlike all of the above (except for timestamp), these values *do* get serialized
-    uint32_t public_ip        = 0;
-    uint16_t storage_port     = 0;
-    uint16_t storage_lmq_port = 0;
-    uint16_t quorumnet_port   = 0;
+    uint32_t public_ip      = 0;
+    uint16_t storage_port   = 0;
+    uint16_t quorumnet_port = 0;
     std::array<uint16_t, 3> version{{0,0,0}};
     crypto::ed25519_public_key pubkey_ed25519 = crypto::ed25519_public_key::null();
 
@@ -93,7 +92,7 @@ namespace service_nodes
     // Returns true if serializable data is changed (in which case `store()` should be called).
     // Note that this does not update the m_x25519_to_pub map if the x25519 key changes (that's the
     // caller's responsibility).
-    bool update(uint64_t ts, uint32_t ip, uint16_t s_port, uint16_t s_lmq_port, uint16_t q_port, std::array<uint16_t, 3> ver, const crypto::ed25519_public_key &pk_ed, const crypto::x25519_public_key &pk_x2);
+    bool update(uint64_t ts, uint32_t ip, uint16_t s_port, uint16_t q_port, std::array<uint16_t, 3> ver, const crypto::ed25519_public_key &pk_ed, const crypto::x25519_public_key &pk_x2);
 
     // Stores this record in the database.
     void store(const crypto::public_key &pubkey, cryptonote::Blockchain &blockchain);
@@ -247,25 +246,21 @@ namespace service_nodes
 
   struct key_image_blacklist_entry
   {
-    enum struct version_t : uint8_t { version_0, version_1_serialize_amount, count, };
-    version_t           version{version_t::version_1_serialize_amount};
+    uint8_t           version{0};
     crypto::key_image key_image;
-    uint64_t          unlock_height = 0;
-    uint64_t          amount        = 0;
+    uint64_t          unlock_height;
 
     key_image_blacklist_entry() = default;
-    key_image_blacklist_entry(version_t version, const crypto::key_image &key_image, uint64_t unlock_height, uint64_t amount)
-  : version{version}, key_image{key_image}, unlock_height{unlock_height}, amount(amount) {}
+    key_image_blacklist_entry(uint8_t version, const crypto::key_image &key_image, uint64_t unlock_height)
+        : version{version}, key_image{key_image}, unlock_height{unlock_height} {}
 
     bool operator==(const key_image_blacklist_entry &other) const { return key_image == other.key_image; }
     bool operator==(const crypto::key_image &image) const { return key_image == image; }
 
     BEGIN_SERIALIZE()
-      ENUM_FIELD(version, version < version_t::count)
+      VARINT_FIELD(version)
       FIELD(key_image)
       VARINT_FIELD(unlock_height)
-      if (version >= version_t::version_1_serialize_amount)
-        VARINT_FIELD(amount)
     END_SERIALIZE()
   };
 
@@ -321,9 +316,9 @@ namespace service_nodes
     bool validate_miner_tx(const crypto::hash& prev_id, const cryptonote::transaction& miner_tx, uint64_t height, int hard_fork_version, cryptonote::block_reward_parts const &base_reward) const override;
     bool alt_block_added(const cryptonote::block& block, const std::vector<cryptonote::transaction>& txs, cryptonote::checkpoint_t const *checkpoint) override;
     block_winner get_block_winner() const { std::lock_guard<boost::recursive_mutex> lock(m_sn_mutex); return m_state.get_block_winner(); }
+
     bool is_service_node(const crypto::public_key& pubkey, bool require_active = true) const;
     bool is_key_image_locked(crypto::key_image const &check_image, uint64_t *unlock_height = nullptr, service_node_info::contribution_t *the_locked_contribution = nullptr) const;
-    uint64_t height() const { return m_state.height; }
 
     /// Note(maxim): this should not affect thread-safety as the returned object is const
     ///
@@ -375,31 +370,12 @@ namespace service_nodes
       }
     }
 
-    /// Copies x25519 pubkeys (as strings) of all currently active SNs into the given output iterator
-    template <typename OutputIt>
-    void copy_active_x25519_pubkeys(OutputIt out) const {
-      std::lock_guard<boost::recursive_mutex> lock(m_sn_mutex);
-      for (const auto& pk_info : m_state.service_nodes_infos) {
-        if (!pk_info.second->is_active())
-          continue;
-        auto it = proofs.find(pk_info.first);
-        if (it == proofs.end())
-          continue;
-        if (const auto& x2_pk = it->second.pubkey_x25519)
-          *out++ = std::string{reinterpret_cast<const char*>(&x2_pk), sizeof(x2_pk)};
-      }
-    }
-
     void set_my_service_node_keys(const service_node_keys *keys);
     void set_quorum_history_storage(uint64_t hist_size); // 0 = none (default), 1 = unlimited, N = # of blocks
     bool store();
 
     /// Record public ip and storage port and add them to the service node list
-    cryptonote::NOTIFY_UPTIME_PROOF::request generate_uptime_proof(const service_node_keys& keys,
-                                                                   uint32_t public_ip,
-                                                                   uint16_t storage_port,
-                                                                   uint16_t storage_lmq_port,
-                                                                   uint16_t quorumnet_port) const;
+    cryptonote::NOTIFY_UPTIME_PROOF::request generate_uptime_proof(const service_node_keys &keys, uint32_t public_ip, uint16_t storage_port, uint16_t quorumnet_port) const;
     bool handle_uptime_proof        (cryptonote::NOTIFY_UPTIME_PROOF::request const &proof, bool &my_uptime_proof_confirmation);
     void record_checkpoint_vote     (crypto::public_key const &pubkey, uint64_t height, bool voted);
 
@@ -521,6 +497,7 @@ namespace service_nodes
   private:
     // Note(maxim): private methods don't have to be protected the mutex
     bool m_rescanning = false; /* set to true when doing a rescan so we know not to reset proofs */
+    void rescan_starting_from_curr_state(bool store_to_disk);
     void process_block(const cryptonote::block& block, const std::vector<cryptonote::transaction>& txs);
 
     void reset(bool delete_db_entry = false);
@@ -586,6 +563,7 @@ namespace service_nodes
       bool make_friendly,
       boost::optional<std::string&> err_msg);
 
-  const static std::vector<payout_entry> null_winner = {{cryptonote::null_address, STAKING_PORTIONS}};
+  const static cryptonote::account_public_address null_address{crypto::null_pkey, crypto::null_pkey};
+  const static std::vector<payout_entry> null_winner = {{null_address, STAKING_PORTIONS}};
   const static block_winner null_block_winner        = {crypto::null_pkey, {null_winner}};
 }

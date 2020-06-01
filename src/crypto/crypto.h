@@ -274,6 +274,7 @@ namespace crypto {
   inline std::ostream &operator <<(std::ostream &o, const crypto::x25519_public_key &v) {
     epee::to_hex::formatted(o, epee::as_byte_span(v)); return o;
   }
+
   const extern crypto::public_key null_pkey;
   const extern crypto::secret_key null_skey;
 }
@@ -283,7 +284,6 @@ EPEE_TYPE_IS_SPANNABLE(crypto::public_key)
 EPEE_TYPE_IS_SPANNABLE(crypto::key_derivation)
 EPEE_TYPE_IS_SPANNABLE(crypto::key_image)
 EPEE_TYPE_IS_SPANNABLE(crypto::signature)
-EPEE_TYPE_IS_SPANNABLE(crypto::ed25519_signature)
 EPEE_TYPE_IS_SPANNABLE(crypto::ed25519_public_key)
 EPEE_TYPE_IS_SPANNABLE(crypto::x25519_public_key)
 

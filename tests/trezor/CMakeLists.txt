@@ -26,12 +26,23 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_executable(trezor_tests
+set(trezor_tests_sources
         tools.cpp
         daemon.cpp
         trezor_tests.cpp
         ../core_tests/chaingen.cpp
         ../core_tests/wallet_tools.cpp)
+
+set(trezor_tests_headers
+        tools.h
+        daemon.h
+        trezor_tests.h
+        ../core_tests/chaingen.h
+        ../core_tests/wallet_tools.h)
+
+add_executable(trezor_tests
+  ${trezor_tests_sources}
+  ${trezor_tests_headers})
 
 target_link_libraries(trezor_tests
   PRIVATE
@@ -47,11 +58,13 @@ target_link_libraries(trezor_tests
     rpc
     cryptonote_protocol
     daemon_rpc_server
-    Boost::chrono
-    Boost::filesystem
-    Boost::program_options
+    ${Boost_CHRONO_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
     ${ZMQ_LIB}
-    extra)
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXTRA_LIBRARIES})
 
 enable_stack_trace(trezor_tests)
 set_property(TARGET trezor_tests

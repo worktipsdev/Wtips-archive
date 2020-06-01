@@ -26,10 +26,11 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_library(blocks blocks.cpp)
+set(GENERATED_SOURCES "")
 
 foreach(BLOB_NAME checkpoints testnet_blocks stagenet_blocks)
     set(OUTPUT_C_SOURCE "generated_${BLOB_NAME}.c")
+    list(APPEND GENERATED_SOURCES ${OUTPUT_C_SOURCE})
     set(INPUT_DAT_FILE "${BLOB_NAME}.dat")
     add_custom_command(
         OUTPUT ${OUTPUT_C_SOURCE} 
@@ -42,6 +43,6 @@ foreach(BLOB_NAME checkpoints testnet_blocks stagenet_blocks)
             echo "'};'" >> ${OUTPUT_C_SOURCE} &&
             echo "'const\tsize_t\t${BLOB_NAME}_len\t=\tsizeof(${BLOB_NAME});'" >> ${OUTPUT_C_SOURCE}
     )
-    target_sources(blocks PRIVATE ${OUTPUT_C_SOURCE})
 endforeach()
 
+add_library(blocks STATIC blocks.cpp ${GENERATED_SOURCES})

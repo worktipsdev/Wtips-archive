@@ -33,7 +33,6 @@
 // utils/generate-quorum-matrix.py script.
 
 #include <array>
-#include <stdexcept>
 
 namespace quorumnet {
 

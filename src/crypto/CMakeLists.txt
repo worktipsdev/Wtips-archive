@@ -27,7 +27,7 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_library(cncrypto
+set(crypto_sources
   aesb.c
   blake256.c
   chacha.c
@@ -53,23 +53,53 @@ add_library(cncrypto
   rx-slow-hash.c
   tree-hash.c)
 
+include_directories(${RANDOMX_INCLUDE})
+
+set(crypto_headers)
+
+set(crypto_private_headers
+  blake256.h
+  chacha.h
+  crypto-ops.h
+  crypto.h
+  generic-ops.h
+  groestl.h
+  groestl_tables.h
+  hash-ops.h
+  hash.h
+  hmac-keccak.h
+  initializer.h
+  jh.h
+  keccak.h
+  oaes_config.h
+  oaes_lib.h
+  random.h
+  skein.h
+  skein_port.h
+  cn_heavy_hash.hpp)
+
+loki_private_headers(cncrypto
+  ${crypto_private_headers})
+loki_add_library(cncrypto
+  ${crypto_sources}
+  ${crypto_headers}
+  ${crypto_private_headers})
 target_link_libraries(cncrypto
   PUBLIC
     epee
     randomx
-    Boost::system
-    Boost::thread
-    Boost::chrono
-    sodium
+    ${Boost_SYSTEM_LIBRARY}
+    ${SODIUM_LIBRARIES}
   PRIVATE
-    extra)
+    ${EXTRA_LIBRARIES})
 
 # Because of the way Qt works on android with JNI, the code does not live in the main android thread
 # So this code runs with a 1 MB default stack size. 
 # This will force the use of the heap for the allocation of the scratchpad
 if (ANDROID OR IOS)
   if( BUILD_GUI_DEPS )
-    target_compile_definitions(cncrypto PUBLIC FORCE_USE_HEAP=1)
+    add_definitions(-DFORCE_USE_HEAP=1)
   endif()
 endif()
+
 

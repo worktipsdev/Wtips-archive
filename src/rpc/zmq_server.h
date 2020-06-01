@@ -29,7 +29,7 @@
 #pragma once
 
 #include <boost/thread/thread.hpp>
-#include <lokimq/lokimq.h>
+#include <zmq.hpp>
 #include <string>
 #include <memory>
 

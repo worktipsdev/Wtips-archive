@@ -1,6 +1,7 @@
 #include "loki.h"
 #include <assert.h>
 
+
 /* Exponential base 2 function.
    Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
@@ -22,6 +23,9 @@
 #include <limits>
 #include <cfloat>
 #include <cmath>
+
+#include <algorithm>
+#include <vector>
 
 // TODO(loki): This is temporary until we switch to integer math for calculating
 // block rewards. We provide the specific implementation to minimise the risk of
@@ -496,5 +500,13 @@ loki::round (double x)
         }
     }
   return z;
+}
+
+uint64_t loki::clamp_u64(uint64_t val, uint64_t min, uint64_t max)
+{
+  assert(min <= max);
+  if (val < min) val = min;
+  else if (val > max) val = max;
+  return val;
 }
 

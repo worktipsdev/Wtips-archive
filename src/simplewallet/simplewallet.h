@@ -52,6 +52,8 @@
 
 #undef LOKI_DEFAULT_LOG_CATEGORY
 #define LOKI_DEFAULT_LOG_CATEGORY "wallet.simplewallet"
+// Hardcode Monero's donation address (see #1447)
+constexpr const char MONERO_DONATION_ADDR[] = "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A";
 
 /*!
  * \namespace cryptonote
@@ -76,7 +78,6 @@ namespace cryptonote
     typedef std::vector<std::string> command_type;
 
     simple_wallet();
-    ~simple_wallet();
     bool init(const boost::program_options::variables_map& vm);
     bool deinit();
     bool run();
@@ -141,6 +142,7 @@ namespace cryptonote
     bool set_confirm_backlog_threshold(const std::vector<std::string> &args = std::vector<std::string>());
     bool set_confirm_export_overwrite(const std::vector<std::string> &args = std::vector<std::string>());
     bool set_refresh_from_block_height(const std::vector<std::string> &args = std::vector<std::string>());
+    bool set_auto_low_priority(const std::vector<std::string> &args = std::vector<std::string>());
     bool set_segregate_pre_fork_outputs(const std::vector<std::string> &args = std::vector<std::string>());
     bool set_key_reuse_mitigation2(const std::vector<std::string> &args = std::vector<std::string>());
     bool set_subaddress_lookahead(const std::vector<std::string> &args = std::vector<std::string>());
@@ -160,26 +162,15 @@ namespace cryptonote
     bool show_incoming_transfers(const std::vector<std::string> &args);
     bool show_payments(const std::vector<std::string> &args);
     bool show_blockchain_height(const std::vector<std::string> &args);
-
-    // lock_time_in_blocks: Only required if making a locked transfer, only for displaying to the user, it should be the lock time specified by the sender
-    // unlock_block:        Only required if lock_time_in_blocks is specified, only for displaying to the user, the height at which the transfer will unlock
-    bool confirm_and_send_tx(std::vector<cryptonote::address_parse_info> const &dests, std::vector<tools::wallet2::pending_tx> &ptx_vector, bool blink, uint64_t lock_time_in_blocks = 0, uint64_t unlock_block = 0, bool called_by_mms = false);
     bool transfer_main(Transfer transfer_type, const std::vector<std::string> &args, bool called_by_mms);
-
     bool transfer(const std::vector<std::string> &args);
     bool locked_transfer(const std::vector<std::string> &args);
-    bool locked_sweep_all(const std::vector<std::string> &args);
-
     bool stake(const std::vector<std::string> &args_);
     bool register_service_node(const std::vector<std::string> &args_);
     bool request_stake_unlock(const std::vector<std::string> &args_);
     bool print_locked_stakes(const std::vector<std::string>& /*args*/);
     bool query_locked_stakes(bool print_result);
-    bool lns_buy_mapping(const std::vector<std::string> &args);
-    bool lns_update_mapping(const std::vector<std::string> &args);
-    bool lns_make_update_mapping_signature(const std::vector<std::string> &args);
-    bool lns_print_owners_to_names(const std::vector<std::string> &args);
-    bool lns_print_name_to_owners(const std::vector<std::string> &args);
+    bool locked_sweep_all(const std::vector<std::string> &args);
 
     enum class sweep_type_t { stake, register_stake, all_or_below, single };
     bool sweep_main_internal(sweep_type_t sweep_type, std::vector<tools::wallet2::pending_tx> &ptx_vector, cryptonote::address_parse_info const &dest, bool blink);
@@ -279,7 +270,7 @@ namespace cryptonote
         uint64_t bc_height,
         uint64_t staking_requirement);
 
-    bool cold_sign_tx(const std::vector<tools::wallet2::pending_tx>& ptx_vector, tools::wallet2::signed_tx_set &exported_txs, std::vector<cryptonote::address_parse_info> const &dsts_info, std::function<bool(const tools::wallet2::signed_tx_set &)> accept_func);
+    bool cold_sign_tx(const std::vector<tools::wallet2::pending_tx>& ptx_vector, tools::wallet2::signed_tx_set &exported_txs, std::vector<cryptonote::address_parse_info> &dsts_info, std::function<bool(const tools::wallet2::signed_tx_set &)> accept_func);
     uint64_t get_daemon_blockchain_height(std::string& err);
     bool try_connect_to_daemon(bool silent = false, uint32_t* version = nullptr);
     bool ask_wallet_create_if_needed();
@@ -425,6 +416,7 @@ namespace cryptonote
 
     std::atomic<bool> m_idle_run;
     boost::thread m_idle_thread;
+    boost::thread m_long_poll_thread;
     boost::mutex m_idle_mutex;
     boost::condition_variable m_idle_cond;
 
@@ -436,7 +428,6 @@ namespace cryptonote
     bool m_long_payment_id_support;
     std::atomic<uint64_t> m_password_asked_on_height;
     crypto::hash          m_password_asked_on_checksum;
-    boost::thread         m_long_poll_thread;
     
     // MMS
     mms::message_store& get_message_store() const { return m_wallet->get_message_store(); };

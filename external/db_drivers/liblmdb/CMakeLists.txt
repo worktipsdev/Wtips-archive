@@ -26,23 +26,30 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_library(lmdb
-  mdb.c
-  midl.c)
-
 if(FREEBSD)
-  target_compile_definitions(lmdb PRIVATE MDB_DSYNC=O_SYNC)
-endif()
-if(ANDROID)
-  target_compile_definitions(lmdb PRIVATE ANDROID=1)
-endif()
-if(${ARCH_WIDTH} EQUAL 32)
-  target_compile_definitions(lmdb PUBLIC MDB_VL32)
+  add_definitions(-DMDB_DSYNC=O_SYNC)
 endif()
 
-target_include_directories(lmdb PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(lmdb PRIVATE Threads::Threads)
-set_property(TARGET lmdb PROPERTY POSITION_INDEPENDENT_CODE ON)
+if(ANDROID)
+  add_definitions("-DANDROID=1")
+endif()
+
+
+set (lmdb_sources
+mdb.c
+midl.c)
+
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+
+add_library(lmdb
+  ${lmdb_sources})
+target_link_libraries(lmdb
+  PRIVATE
+    ${CMAKE_THREAD_LIBS_INIT})
+if(${ARCH_WIDTH} EQUAL 32)
+  target_compile_definitions(lmdb
+    PUBLIC -DMDB_VL32)
+endif()
 
 # GUI/libwallet install target
 if (BUILD_GUI_DEPS)
@@ -55,3 +62,4 @@ if (BUILD_GUI_DEPS)
         ARCHIVE DESTINATION ${lib_folder}
         LIBRARY DESTINATION ${lib_folder})
 endif()
+set_property(TARGET lmdb APPEND PROPERTY COMPILE_FLAGS "-fPIC")

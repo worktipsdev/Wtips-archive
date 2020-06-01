@@ -329,7 +329,6 @@ namespace cryptonote
       crypto::ed25519_signature sig_ed25519;
       uint32_t public_ip;
       uint16_t storage_port;
-      uint16_t storage_lmq_port;
       uint16_t qnet_port;
 
       BEGIN_KV_SERIALIZE_MAP()
@@ -339,7 +338,6 @@ namespace cryptonote
         KV_SERIALIZE(timestamp)
         KV_SERIALIZE(public_ip)
         KV_SERIALIZE(storage_port)
-        KV_SERIALIZE(storage_lmq_port)
         KV_SERIALIZE(qnet_port)
         KV_SERIALIZE_VAL_POD_AS_BLOB(pubkey)
         KV_SERIALIZE_VAL_POD_AS_BLOB(sig)
