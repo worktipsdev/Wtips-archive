@@ -80,7 +80,7 @@ static constexpr HardFork::Params testnet_hard_forks[] =
   { network_version_9_service_nodes,     3, 0, 1560721200 },
   { network_version_10_bulletproofs,     4, 0, 1560722200 },
   { network_version_11_infinite_staking, 5, 0, 1560723200 },
-  { network_version_12_checkpointing,       50,  0, 1560724200 }, // 2019-06-28 14:00AEDT
+  { network_version_12_checkpointing,    2000,  0, 1560724200 }, // 2019-06-28 14:00AEDT
 //{ network_version_13_enforce_checkpoints, 60, 0, 1560724200 }, // 2019-09-13 16:00AEDT
 //{ network_version_14_blink_lns,           70, 0, 1560725200 }, // 2019-11-30 07:00UTC
 };
