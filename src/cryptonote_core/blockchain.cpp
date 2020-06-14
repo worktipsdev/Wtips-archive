@@ -1235,7 +1235,7 @@ bool Blockchain::validate_miner_transaction(const block& b, size_t cumulative_bl
       return false;
     }
 
-    txversion min_version = transaction::get_max_version_for_hf(version);
+    txversion min_version = txversion::v2_ringct; // keep txv2 support for mm
     txversion max_version = transaction::get_min_version_for_hf(version);
     if (b.miner_tx.version < min_version || b.miner_tx.version > max_version)
     {
