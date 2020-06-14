@@ -248,7 +248,10 @@ namespace cryptonote
   const command_line::arg_descriptor<uint64_t> arg_recalculate_difficulty = {
     "recalculate-difficulty",
     "Recalculate per-block difficulty starting from the height specified",
-    0};
+	// TODO: We can disable this post-pulse (since diff won't matter anymore), but until then there
+    // is a subtle bug somewhere in difficulty calculations that can cause divergence; this seems
+    // important enough to just rescan at every startup (and only takes a few seconds).
+    1};
 
   static const command_line::arg_descriptor<uint64_t> arg_store_quorum_history = {
     "store-quorum-history",

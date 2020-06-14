@@ -2032,7 +2032,7 @@ namespace service_nodes
   static constexpr proof_version hf_min_worktips_versions[] = {
     {cryptonote::network_version_14_blink_lns,            {6,0,0}},
     {cryptonote::network_version_13_enforce_checkpoints,  {5,1,0}},
-    {cryptonote::network_version_12_checkpointing,        {3,0,0}},
+    {cryptonote::network_version_12_checkpointing,        {4,0,1}},
   };
 
   template <typename T>

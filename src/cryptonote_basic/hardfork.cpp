@@ -70,10 +70,7 @@ static constexpr HardFork::Params mainnet_hard_forks[] =
   { network_version_9_service_nodes,		 54689, 0, 1561804620 },
   { network_version_10_bulletproofs,		 54690, 0, 1561804740 },
   { network_version_11_infinite_staking,	 54691, 0, 1561804860 }, // 2019-03-26 13:00AEDT
-  { network_version_12_checkpointing,       309702, 0, 1592774725 }, 
-//{ network_version_13_enforce_checkpoints, 309209, 0, 1571850000 }, // 2019-10-23 19:00AEDT
-  // TODO: add v14 fork height; also remember to update hf_min_worktips_versions in service_node_list
-  // with the final 6.1.0 release version.
+  { network_version_12_checkpointing,       314742, 0, 1593379500 }, // 06/28/2020 @ 9:25pm (UTC)
 };
 
 static constexpr HardFork::Params testnet_hard_forks[] =
