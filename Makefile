@@ -102,7 +102,7 @@ release-test:
 
 release-all:
 	mkdir -p $(builddir)/release
-	cd $(builddir)/release && cmake -D BUILD_TESTS=ON -D CMAKE_BUILD_TYPE=release -D WARNINGS_AS_ERRORS=ON $(topdir) && $(MAKE)
+	cd $(builddir)/release && cmake -D BUILD_TESTS=OFF -D CMAKE_BUILD_TYPE=release -D WARNINGS_AS_ERRORS=ON $(topdir) && $(MAKE)
 
 release-static:
 	mkdir -p $(builddir)/release
