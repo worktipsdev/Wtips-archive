@@ -109,11 +109,14 @@ namespace crypto {
 	    case cn_slow_hash_type::chukwa_slow_hash:
       default:
       {
-         const uint32_t CHUKWA_HASHLEN = 32;
-         const uint32_t CHUKWA_SALTLEN = 16;
-         const uint32_t CHUKWA_THREADS = 1;
-         const uint32_t CHUKWA_ITERS = 3;
-         const uint32_t CHUKWA_MEMORY = 512;		 
+		 // Chukwa Common Definitions
+         const uint32_t CHUKWA_HASHLEN = 32; // The length of the resulting hash in bytes
+         const uint32_t CHUKWA_SALTLEN = 16; // The length of our salt in bytes
+		 
+		 // Chukwa v2 Definitions
+         const uint32_t CHUKWA_THREADS = 1; // How many threads to use at once
+         const uint32_t CHUKWA_ITERS = 4; // How many iterations we perform as part of our slow-hash
+         const uint32_t CHUKWA_MEMORY = 1024; // This value is in KiB (1.00MB)		 
 
 		 uint8_t salt[CHUKWA_SALTLEN];
         memcpy(salt, data, sizeof(salt));

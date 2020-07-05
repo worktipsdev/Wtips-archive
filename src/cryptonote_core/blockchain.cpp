@@ -887,7 +887,7 @@ difficulty_type Blockchain::get_difficulty_for_next_block()
   }
   size_t target = get_difficulty_target();
 
-  // HF12 switches to RandomX with a likely drastically reduced hashrate versus Turtle, so override
+  // HF12 switches to Chukwa V2 with a likely drastically increased hashrate versus Turtle, so override
   // difficulty for the first difficulty window blocks:
   uint64_t hf12_height = m_hardfork->get_earliest_ideal_height_for_version(network_version_12_checkpointing);
 
@@ -1125,7 +1125,7 @@ difficulty_type Blockchain::get_next_difficulty_for_alternative_chain(const std:
   // FIXME: This will fail if fork activation heights are subject to voting
   size_t target = DIFFICULTY_TARGET_V2;
 
-  // HF12 switches to RandomX with a likely drastically reduced hashrate versus Turtle, so override
+  // HF12 switches to Chukwa V2 with a likely drastically increased hashrate versus Turtle, so override
   // difficulty for the first difficulty window blocks:
   uint64_t hf12_height = m_hardfork->get_earliest_ideal_height_for_version(network_version_12_checkpointing);
   uint64_t height = (alt_chain.size() ? alt_chain.front().height : alt_block_height) + alt_chain.size() + 1;
